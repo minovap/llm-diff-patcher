@@ -1,5 +1,6 @@
 import { diffArrays } from 'diff';
 import { findDiffs } from "./utils/findDiffs";
+import {Hunk} from "./utils/processFencedBlock";
 
 /**
  * Custom error for when a diff cannot be matched to the source content
@@ -108,7 +109,7 @@ export function applyFuzzyDiff(
   diffText: string
 ): FuzzyDiffResult {
   // Parse the diff text into hunks
-  const hunks = findDiffs(diffText);
+  const hunks: Hunk[] = findDiffs(diffText);
   
   // Initialize result object
   const result: FuzzyDiffResult = {
@@ -122,11 +123,11 @@ export function applyFuzzyDiff(
   const errors: string[] = [];
   
   // Process hunks
-  const normalizedHunks = normalizeHunks(hunks);
+  const normalizedHunks: Hunk[] = normalizeHunks(hunks);
   let currentContent = sourceText;
   
   for (let i = 0; i < normalizedHunks.length; i++) {
-    const hunkLines = normalizedHunks[i][1];
+    const hunkLines = normalizedHunks[i].lines;
     
     try {
       // Apply the hunk to the content
@@ -198,23 +199,28 @@ export function applyFuzzyDiff(
 /**
  * Normalize hunks by cleaning them and ensuring they have valid before/after sections
  */
-function normalizeHunks(hunks: [string | undefined, string[]][]): [string | undefined, string[]][] {
+function normalizeHunks(hunks: Hunk[]): Hunk[] {
   const seen = new Set<string>();
-  const uniqueHunks: [string | undefined, string[]][] = [];
+  const uniqueHunks: Hunk[] = [];
   
-  for (const [path, hunkLines] of hunks) {
-    const normalizedLines = normalizeHunk(hunkLines);
+  for (const hunk of hunks) {
+    const normalizedLines = normalizeHunkLines(hunk.lines);
+
     if (normalizedLines.length === 0) {
       continue;
     }
     
-    const key = (path || '') + '\n' + normalizedLines.join('');
+    const key = normalizedLines.join('');
+
     if (seen.has(key)) {
       continue;
     }
     
     seen.add(key);
-    uniqueHunks.push([path, normalizedLines]);
+
+    hunk.lines = normalizedLines;
+
+    uniqueHunks.push(hunk);
   }
   
   return uniqueHunks;
@@ -223,7 +229,7 @@ function normalizeHunks(hunks: [string | undefined, string[]][]): [string | unde
 /**
  * Normalize a hunk by cleaning it and ensuring it has valid before/after sections
  */
-function normalizeHunk(hunk: string[]): string[] {
+function normalizeHunkLines(hunk: string[]): string[] {
   const beforeAfter = hunkToBeforeAfter(hunk, true);
   if (!Array.isArray(beforeAfter) || beforeAfter.length !== 2) {
     return hunk;
@@ -260,7 +266,7 @@ function doReplace(content: string, hunk: string[]): string | null {
   // Convert to string if they're arrays
   const before = typeof beforeText === 'string' ? beforeText : Array.isArray(beforeText) ? beforeText.join('') : '';
   const after = typeof afterText === 'string' ? afterText : Array.isArray(afterText) ? afterText.join('') : '';
-  
+
   // Handle empty before text (new file or append)
   if (!before.trim()) {
     if (after.trim()) {
@@ -524,7 +530,7 @@ function directlyApplyHunk(content: string, hunk: string[]): string | null {
   
   const beforeLines = before.split('\n');
   const beforeStripped = beforeLines.map(line => line.trim()).join('');
-  
+
   // Refuse to do a repeated search and replace on a tiny bit of non-whitespace context
   if (beforeStripped.length < 10 && content.includes(before) && content.indexOf(before) !== content.lastIndexOf(before)) {
     return null;
@@ -534,10 +540,7 @@ function directlyApplyHunk(content: string, hunk: string[]): string | null {
     const newContent = flexiJustSearchAndReplace(before, after, content);
     return newContent;
   } catch (e) {
-    if (e instanceof SearchTextNotUniqueError) {
-      return null;
-    }
-    throw e;
+    throw new UnifiedDiffNotUniqueError(before);
   }
 }
 
