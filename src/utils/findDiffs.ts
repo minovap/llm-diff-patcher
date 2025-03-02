@@ -1,69 +1,51 @@
-import { processFencedBlock } from './processFencedBlock';
+import { processFencedBlock, Hunk } from './processFencedBlock';
+
+export class NoFilenameForHunkError extends Error {
+  constructor(public hunk: string) {
+    super(`Invalid diff format: No filename specified for hunk:\n${hunk}`);
+    this.name = 'NoFilenameForHunkError';
+  }
+}
+
+export class InsufficientContextError extends Error {
+  constructor(public hunk: string) {
+    super(`Invalid diff format: Insufficient context to apply changes reliably:\n${hunk}\nPlease provide context lines before and after the changes.`);
+    this.name = 'InsufficientContextError';
+  }
+}
 
 /**
- * Parse a unified diff text into diff hunks
+ * Parse a unified diff text into FileHunks objects
  */
-export function findDiffs(diffText: string): [string | undefined, string[]][] {
+export function findDiffs(diffText: string): Hunk[] {
   // Ensure the diff text ends with a newline
   if (!diffText.endsWith('\n')) {
     diffText += '\n';
   }
 
   const lines = diffText.split('\n').map(line => line + '\n');
-  const edits: [string | undefined, string[]][] = [];
+  const fileDiffs: Hunk[] = [];
 
   let lineNum = 0;
   while (lineNum < lines.length) {
     const line = lines[lineNum];
     if (line.startsWith('```diff')) {
-      const [nextLineNum, theseEdits] = processFencedBlock(lines, lineNum + 1);
-      edits.push(...theseEdits);
-      lineNum = nextLineNum;
-      continue;
-    }
-
-    // Look for diff headers or hunks
-    if (line.startsWith('--- ') && lineNum + 1 < lines.length && lines[lineNum + 1].startsWith('+++ ')) {
-      // Found a file diff header
-      let fname = lines[lineNum + 1].substring(4).trim();
-      lineNum += 2;
-
-      // Look for hunks
-      const hunk: string[] = [];
-      let keeper = false;
-
-      while (lineNum < lines.length) {
-        const hunkLine = lines[lineNum];
-        if (hunkLine.startsWith('--- ')) {
-          break;
+      const result = processFencedBlock(lines, lineNum + 1);
+      
+      // Convert processed hunks to FileHunks format
+      for (const hunk of result.hunks) {
+        if (!hunk.oldFile && !hunk.newFile) {
+          const hunkContent = hunk.lines.join('');
+          throw new NoFilenameForHunkError(hunkContent);
         }
 
-        if (hunkLine.startsWith('@@ ')) {
-          if (keeper && hunk.length > 0) {
-            edits.push([fname, hunk]);
-            hunk.length = 0;
-          }
+        hunk.oldFile = hunk.oldFile ? parseFileName(hunk.oldFile) : null;
+        hunk.newFile = hunk.newFile ? parseFileName(hunk.newFile) : null;
 
-          keeper = false;
-          lineNum++;
-          continue;
-        }
-
-        const op = hunkLine.charAt(0);
-        if (op === '-' || op === '+') {
-          hunk.push(hunkLine);
-          keeper = true;
-        } else if (op === ' ') {
-          hunk.push(hunkLine);
-        }
-
-        lineNum++;
+        fileDiffs.push(hunk);
       }
-
-      if (keeper && hunk.length > 0) {
-        edits.push([fname, hunk]);
-      }
-
+      
+      lineNum = result.nextLineNumber;
       continue;
     }
 
@@ -71,5 +53,23 @@ export function findDiffs(diffText: string): [string | undefined, string[]][] {
     lineNum++;
   }
 
-  return edits;
+  return fileDiffs;
+}
+
+/**
+ * Parse a filename from a diff header, handling special cases
+ * - Strip a/ and b/ prefixes
+ * - Convert /dev/null to null
+ */
+function parseFileName(filename: string): string | null {
+  if (filename === '/dev/null') {
+    return null;
+  }
+  
+  // Remove a/ or b/ prefix if present
+  if (filename.startsWith('a/') || filename.startsWith('b/')) {
+    return filename.substring(2);
+  }
+  
+  return filename;
 }
