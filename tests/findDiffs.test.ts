@@ -1,5 +1,4 @@
-import { findDiffs, NoFilenameForHunkError } from '../src/utils/findDiffs';
-import {Hunk} from "../src/utils/processFencedBlock";
+import {DiffHunkExtractor} from "../src/utils/hunkExtractor";
 
 describe('findDiffs', () => {
   beforeEach(() => {
@@ -18,11 +17,10 @@ describe('findDiffs', () => {
 
 \`\`\``;
 
-    const result1 = findDiffs(diffWithTrailingEmptyLine);
-    expect(result1).toHaveLength(1);
-    expect(result1[0].oldFile).toBe('file.js');
-    expect(result1[0].newFile).toBe('file.js');
-    expect(result1[0].lines).toHaveLength(2);
+    const extractor = new DiffHunkExtractor(diffWithTrailingEmptyLine);
+    expect(extractor.hunks).toHaveLength(1);
+    expect(extractor.hunks[0].oldFileName).toBe('file.js');
+    expect(extractor.hunks[0].newFileName).toBe('file.js');
 
     const twoDiffsWithTrailingEmptyLineBetween = `
 \`\`\`diff
@@ -40,15 +38,13 @@ describe('findDiffs', () => {
 
 \`\`\``;
 
-    const result2 = findDiffs(twoDiffsWithTrailingEmptyLineBetween);
-    expect(result2).toHaveLength(2);
-    expect(result2[0].oldFile).toBe('file.js');
-    expect(result2[0].newFile).toBe('file.js');
-    expect(result2[0].lines).toHaveLength(2);
-    expect(result2[1].oldFile).toBe('file2.js');
-    expect(result2[1].newFile).toBe('file2.js');
-    expect(result2[1].lines).toHaveLength(2);
+    const extractor2 = new DiffHunkExtractor(twoDiffsWithTrailingEmptyLineBetween);
+    expect(extractor2.hunks).toHaveLength(2);
+    expect(extractor2.hunks[0].oldFileName).toBe('file.js');
+    expect(extractor2.hunks[0].newFileName).toBe('file.js');
 
+    expect(extractor2.hunks[1].oldFileName).toBe('file2.js');
+    expect(extractor2.hunks[1].newFileName).toBe('file2.js');
   });
 
   it('should throw NoFilenameForHunkError for diffs without filename', () => {
@@ -68,9 +64,12 @@ describe('findDiffs', () => {
 
 This improvement accounts for the quantity of each product when calculating revenue.`;
 
+    expect(true).toBe(false);
+    /*
     expect(() => {
       findDiffs(diffWithoutFilename);
     }).toThrow(NoFilenameForHunkError);
+    */
   });
 
   it('should parse simple diff blocks from AI-generated output', () => {
@@ -90,12 +89,15 @@ This improvement accounts for the quantity of each product when calculating reve
 
 This change multiplies the price by the quantity for each item.`;
 
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(aiGeneratedDiff);
     
     expect(result).toHaveLength(1);
     expect(result[0].oldFile).toBe('src/calculator.js');
     expect(result[0].newFile).toBe('src/calculator.js');
     expect(result[0].lines).toHaveLength(6);
+    */
   });
 
   it('should handle AI diffs with inaccurate line numbers', () => {
@@ -114,12 +116,14 @@ This change multiplies the price by the quantity for each item.`;
 
 This adds a null check before checking the length.`;
 
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(aiGeneratedDiff);
     
     expect(result).toHaveLength(1);
     expect(result[0].oldFile).toBe('src/validator.js');
     expect(result[0].newFile).toBeNull();
-    expect(result[0].lines).toHaveLength(5);
+    expect(result[0].lines).toHaveLength(5);*/
   });
 
   it('should parse multiple hunks from a single AI response', () => {
@@ -146,6 +150,9 @@ This adds a null check before checking the length.`;
 +}
 \`\`\``;
 
+    expect(true).toBe(false);
+    /*
+
     const result = findDiffs(aiGeneratedDiff);
     
     expect(result).toHaveLength(2);
@@ -154,7 +161,7 @@ This adds a null check before checking the length.`;
     expect(result[0].lines).toHaveLength(5);
     expect(result[1].oldFile).toBe('src/taxes.js');
     expect(result[1].newFile).toBe('src/taxes.js');
-    expect(result[1].lines).toHaveLength(8);
+    expect(result[1].lines).toHaveLength(8);*/
   });
 
   it('should handle AI-generated diffs with file path specifications', () => {
@@ -186,6 +193,8 @@ Also update the utils.js file:
      .then(response => response.json());
  }
 \`\`\``;
+    expect(true).toBe(false);
+    /*
 
     const result = findDiffs(aiGeneratedDiff);
     
@@ -199,7 +208,7 @@ Also update the utils.js file:
     // Second file
     expect(result[1].oldFile).toBe('src/utils.js');
     expect(result[1].newFile).toBe('src/utils.js');
-    expect(result[1].lines).toHaveLength(7);
+    expect(result[1].lines).toHaveLength(7);*/
   });
 
   it('should handle AI diffs containing non-standard formatting', () => {
@@ -219,6 +228,8 @@ Also update the utils.js file:
 \`\`\`
 
 The improved version handles null inputs and invalid dates.`;
+    expect(true).toBe(false);
+    /*
 
     const result = findDiffs(aiGeneratedDiff);
     
@@ -226,6 +237,7 @@ The improved version handles null inputs and invalid dates.`;
     expect(result[0].oldFile).toBe('src/date.js');
     expect(result[0].newFile).toBe('src/date.js');
     expect(result[0].lines).toHaveLength(7);
+    */
   });
 
   it('should handle AI-generated diffs with explanatory context', () => {
@@ -255,12 +267,13 @@ The improved version handles null inputs and invalid dates.`;
 
 This change prevents setState on unmounted components.`;
 
-    const result = findDiffs(aiGeneratedDiff);
-    
+    expect(true).toBe(false);
+    /*const result = findDiffs(aiGeneratedDiff);
+
     expect(result).toHaveLength(1);
     expect(result[0].oldFile).toBe('src/date.js');
     expect(result[0].newFile).toBe('src/date.js');
-    expect(result[0].lines).toHaveLength(16);
+    expect(result[0].lines).toHaveLength(16);*/
   });
 
   it('should handle AI-generated diffs with additional whitespace and formatting', () => {
@@ -289,19 +302,27 @@ Let's clean up the code:
     
 That's much more readable, right?`;
 
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(aiGeneratedDiff);
-    
+
     expect(result).toHaveLength(1);
     expect(result[0].oldFile).toBe('src/date.js');
     expect(result[0].newFile).toBe('src/date.js');
     expect(result[0].lines).toHaveLength(9);
+
+     */
   });
 
   it('should handle empty or malformed AI-generated diffs gracefully', () => {
     const emptyDiff = `I thought about it and no changes are needed.`;
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(emptyDiff);
     expect(result).toHaveLength(0);
-    
+
+     */
+
     const malformedDiff = `Here's what you need to change:
 
 \`\`\`
@@ -320,9 +341,12 @@ function add(a, b) {
   return a + b;
 }
 \`\`\``;
-
+    expect(true).toBe(false);
+    /*
     const malformedResult = findDiffs(malformedDiff);
     expect(malformedResult).toHaveLength(0);
+
+     */
   });
 
   it('should test various @@ @@ header formats that AI bots might hallucinate', () => {
@@ -337,11 +361,15 @@ function add(a, b) {
  console.log(greeting);
 \`\`\``;
 
+    expect(true).toBe(false);
+    /*
     const result1 = findDiffs(standardDiff);
     expect(result1).toHaveLength(1);
     expect(result1[0].oldFile).toBe('file.js');
     expect(result1[0].newFile).toBe('file.js');
     expect(result1[0].lines).toHaveLength(3);
+
+     */
 
     // Case 2: Minimal headers with just line numbers
     const minimalDiff = `
@@ -352,12 +380,15 @@ function add(a, b) {
 -var x = 1;
 +let x = 1;
 \`\`\``;
-
+    expect(true).toBe(false);
+    /*
     const result2 = findDiffs(minimalDiff);
     expect(result2).toHaveLength(1);
     expect(result2[0].oldFile).toBe('file.js');
     expect(result2[0].newFile).toBe('file.js');
     expect(result2[0].lines).toHaveLength(2);
+
+     */
 
     // Case 3: Headers with function names (often hallucinated)
     const functionNameDiff = `
@@ -368,12 +399,14 @@ function add(a, b) {
 -return 42;
 +return 43;
 \`\`\``;
-
+    expect(true).toBe(false);
+    /*
     const result3 = findDiffs(functionNameDiff);
     expect(result3).toHaveLength(1);
     expect(result3[0].oldFile).toBe('file.js');
     expect(result3[0].newFile).toBe('file.js');
     expect(result3[0].lines).toHaveLength(2);
+     */
 
     // Case 4: Extra content in the headers
     const extraContentDiff = `
@@ -385,13 +418,15 @@ function add(a, b) {
 +  // Add a and b
 +  return a + b;
 \`\`\``;
-    
+    /*
     const result4 = findDiffs(extraContentDiff);
     expect(result4).toHaveLength(1);
     expect(result4[0].oldFile).toBe('file.js');
     expect(result4[0].newFile).toBe('file.js');
     expect(result4[0].lines).toHaveLength(3);
 
+     */
+    expect(true).toBe(false);
     // Case 5: Extra spaces in headers
     const extraSpacesDiff = `
 \`\`\`diff
@@ -402,12 +437,16 @@ function add(a, b) {
 +// Initialize sum
 +let sum = 0;
 \`\`\``;
-    
+
+    expect(true).toBe(false);
+    /*
     const result5 = findDiffs(extraSpacesDiff);
     expect(result5).toHaveLength(1);
     expect(result5[0].oldFile).toBe('file.js');
     expect(result5[0].newFile).toBe('file.js');
     expect(result5[0].lines).toHaveLength(3);
+
+     */
 
     // Case 6: With filename in a separate section
     const filenameDiff = `
@@ -418,12 +457,15 @@ function add(a, b) {
 -const PORT = 3000;
 +const PORT = process.env.PORT || 3000;
 \`\`\``;
-    
+    expect(true).toBe(false);
+    /*
     const result6 = findDiffs(filenameDiff);
     expect(result6).toHaveLength(1);
     expect(result6[0].oldFile).toBe('src/app.js');
     expect(result6[0].newFile).toBe('src/app.js');
     expect(result6[0].lines).toHaveLength(2);
+
+     */
 
     // Case 7: Multiple chunks with different formats, including filenames
     const multiFormatDiff = `
@@ -444,7 +486,8 @@ function add(a, b) {
 -return JSON.parse(data);
 +try { return JSON.parse(data); } catch (e) { return {}; }
 \`\`\``;
-    
+    expect(true).toBe(false);
+    /*
     const result7 = findDiffs(multiFormatDiff);
     expect(result7).toHaveLength(3);
     expect(result7[0].oldFile).toBe('src/config.js');
@@ -457,6 +500,8 @@ function add(a, b) {
     expect(result7[2].newFile).toBe('src/utils.js');
     expect(result7[2].lines).toHaveLength(2);
 
+     */
+
     // Case 8: Missing space between @@ symbols
     const missingSpaceDiff = `
 \`\`\`diff
@@ -467,12 +512,15 @@ function add(a, b) {
 +// Boolean flag
 +const flag = true;
 \`\`\``;
-    
+    expect(true).toBe(false);
+    /*
     const result8 = findDiffs(missingSpaceDiff);
     expect(result8).toHaveLength(1);
     expect(result8[0].oldFile).toBe('src/utils.js');
     expect(result8[0].newFile).toBe('src/utils.js');
     expect(result8[0].lines).toHaveLength(3);
+
+     */
 
     // Case 9: Only one @@ symbol
     const singleAtDiff = `
@@ -483,11 +531,14 @@ function add(a, b) {
 -throw Error("Failed");
 +throw new Error("Operation failed");
 \`\`\``;
-    
+    expect(true).toBe(false);
+    /*
     const result9 = findDiffs(singleAtDiff);
     expect(result9).toHaveLength(1);
     expect(result9[0].oldFile).toBe('src/utils.js');
     expect(result9[0].newFile).toBe('src/utils.js');
+
+     */
 
     // Case 10: Mix of filenames and function descriptions
     const mixedDiff = `
@@ -498,11 +549,14 @@ function add(a, b) {
 -const result = options.default;
 +const result = options.default || {};
 \`\`\``;
-    
+    expect(true).toBe(false);
+    /*
     const result10 = findDiffs(mixedDiff);
     expect(result10).toHaveLength(1);
     expect(result10[0].oldFile).toBe('lib/helpers.js');
     expect(result10[0].newFile).toBe('lib/helpers.js');
+
+     */
   });
 
   it('should handle /dev/null in file paths', () => {
@@ -516,11 +570,14 @@ function add(a, b) {
 +  return true;
 +}
 \`\`\``;
-
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(nullFileDiff);
     expect(result).toHaveLength(1);
     expect(result[0].oldFile).toBeNull();
     expect(result[0].newFile).toBe('src/new-file.js');
+
+     */
   });
 
   it('should match the example output format', () => {
@@ -542,8 +599,10 @@ function add(a, b) {
 +try { return JSON.parse(data); } catch (e) { return {}; }
 \`\`\``;
 
+    expect(true).toBe(false);
+    /*
     const result = findDiffs(exampleDiff);
-    
+
     expect(result).toHaveLength(3);
     expect(result[0].oldFile).toBe('src/config.js');
     expect(result[0].newFile).toBe('src/config.js');
@@ -556,5 +615,7 @@ function add(a, b) {
     expect(result[2].oldFile).toBe(null);
     expect(result[2].newFile).toBe('src/utils.js');
     expect(result[2].lines).toHaveLength(1);
+
+     */
   });
 });

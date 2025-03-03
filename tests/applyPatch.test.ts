@@ -12,7 +12,10 @@ It contains multiple lines
 Goodbye world`;
 
       // This patch has completely incorrect line numbers that don't match the file
-      const patch = `--- a/original.txt
+      const patch = `
+// a comment here
+
+--- a/original.txt
 +++ b/original.txt
 @@ ... @@
  Hello world
