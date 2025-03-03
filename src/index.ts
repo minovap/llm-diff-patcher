@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as Diff from 'diff';
 import { parsePatch, DiffsGroupedByFilenames } from './utils/parsePatch';
 import { applyDiff } from './utils/applyDiff';
 import { BaseError, HunkHeaderCountMismatchError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError } from './utils/errors';
@@ -79,17 +80,25 @@ export interface ApplyDiffResult {
 export interface ApplyDiffOptions {
   basePath?: string;
   dryRun?: boolean;
+  jsDiffApplyPatchOptions?: Diff.ApplyPatchOptions;
 }
 
 /**
  * Applies a patch/diff to files in the file system
- * @param patch The patch/diff string to apply
- * @param options Options for applying the diff
+ * @param patchString The patch/diff string to apply
+ * @param options Configuration options including basePath, dryRun flag, and jsDiffApplyPatchOptions
  * @returns A result object with details about the application
  */
-export function applyPatchToFiles(patch: string, options: ApplyDiffOptions = {}): ApplyDiffResult {
-  const basePath = options.basePath || process.cwd();
-  const dryRun = options.dryRun || false;
+export function applyPatchToFiles(patchString: string, options: {
+  basePath: string;
+  dryRun?: boolean;
+  jsDiffApplyPatchOptions?: Diff.ApplyPatchOptions;
+}): ApplyDiffResult {
+  const {
+    basePath = process.cwd(),
+    dryRun = false,
+    jsDiffApplyPatchOptions = {}
+  } = options;
   
   // Initialize the result object
   const result: ApplyDiffResult = {
@@ -106,12 +115,12 @@ export function applyPatchToFiles(patch: string, options: ApplyDiffOptions = {})
 
   try {
     // Parse the patch
-    const diffsGroupedByFilenames = parsePatch(patch);
+    const diffsGroupedByFilenames = parsePatch(patchString);
     result.totalFiles = diffsGroupedByFilenames.length;
     
     // Process each file diff
     for (const diffGroup of diffsGroupedByFilenames) {
-      const fileResult = applyDiffToFile(diffGroup, basePath, dryRun);
+      const fileResult = applyDiffToFile(diffGroup, basePath, dryRun, jsDiffApplyPatchOptions);
       
       // Add this file's results to the overall result
       result.fileResults.push(fileResult);
@@ -151,9 +160,15 @@ export function applyPatchToFiles(patch: string, options: ApplyDiffOptions = {})
  * @param diffGroup The diff group for a single file
  * @param basePath The base path to resolve file paths
  * @param dryRun Whether to actually write files or just simulate
+ * @param options Optional options to pass to the diff application
  * @returns Result object for this file
  */
-function applyDiffToFile(diffGroup: DiffsGroupedByFilenames, basePath: string, dryRun: boolean): FileDiffResult {
+function applyDiffToFile(
+  diffGroup: DiffsGroupedByFilenames, 
+  basePath: string, 
+  dryRun: boolean,
+  options?: Diff.ApplyPatchOptions
+): FileDiffResult {
   const oldFilePath = path.join(basePath, diffGroup.oldFileName);
   const newFilePath = path.join(basePath, diffGroup.newFileName);
   
@@ -189,7 +204,7 @@ function applyDiffToFile(diffGroup: DiffsGroupedByFilenames, basePath: string, d
     const diff = diffGroup.diffs[i];
     
     try {
-      const result = applyDiff(modifiedContents, diff);
+      const result = applyDiff(modifiedContents, diff, options);
       
       if (result) {
         modifiedContents = result;
