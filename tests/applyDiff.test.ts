@@ -1,10 +1,8 @@
-import {applyDiff, DiffsGroupedByFilenames, parsePatch} from "../src";
-// @ts-ignore
-import parsePatchOriginal from "../src/utils/parsePatchOriginal.js";
+import {applyDiff, parsePatch} from "../src";
 import fs from 'fs';
 import path from 'path';
-import {cleanPatch} from "../src/utils/patchCleaner";
 import * as Diff from "diff";
+import {HunkHeaderCountMismatchError, NotEnoughContextError} from "../src/utils/errors";
 
 const testDir = path.join(__dirname, 'applyDiffFiles');
 
@@ -21,84 +19,126 @@ describe('applyDiff', () => {
     }
   });
 
-  it('should not have any file names in the headers', () => {
-  });
-
   it('should open files and edit them', () => {
     const patch = `--- a/test1.originaltext.txt
-
-+++ b/test1.originaltext.txt
-
-@@ ... @@
-
++++ b/test1.result.txt
+@@ -1,4 +1,4 @@
  Hello world
 -This is a test file
 +This is a modified test file
  It contains multiple lines
- Goodbye world
+ Goodbye world`;
 
-@@ ... @@
+    const diffsGroupedByFilenames = parsePatch(patch);
 
- Hello world
--This is a test file
-+This is a modified test file
- It contains multiple lines
- Goodbye world
-
-`;
-    const cleanedPath = cleanPatch(patch)
-
-    const diffsGroupedByFilenames = parsePatch(cleanedPath);
-
-    const applyDiffGroup = (diffGroup: DiffsGroupedByFilenames, workingDirectory: string = '') => {
-      const newFileName = path.basename(diffGroup.newFileName);
+    for (const diffGroup of diffsGroupedByFilenames) {
       const oldFilePath = path.join(testDir, diffGroup.oldFileName);
-
-
+      const newFilePath = path.join(testDir, diffGroup.newFileName);
       let fileContents;
 
       try {
-        fileContents = fs.readFileSync(oldFilePath).toString();
+        fileContents = fs.readFileSync(oldFilePath, 'utf8');
       } catch (e) {
         throw Error(`old file ${oldFilePath} not found`);
       }
 
-
-      const resultPath = path.join(testDir, oldFilePath.replace('.txt', '.result.txt'));
-      /*
-      // Construct paths
-      const expectedResultPath = path.join(testDir, oldFileName.replace('.txt', '.expectedresult.txt'));
-
-      // Read files
-      const originalText = fs.readFileSync(originalTextPath, 'utf8');
-      const expectedResult = fs.readFileSync(expectedResultPath, 'utf8');
-
       for (const diff of diffGroup.diffs) {
-        const result = applyDiff(originalText, diff);
+        const result = applyDiff(fileContents, diff);
 
         if (result) {
           // Save the result to a file
-          fs.writeFileSync(resultPath, result, 'utf8');
+          fs.writeFileSync(newFilePath, result, 'utf8');
         }
-
-        // Compare with expected result
-        expect(result).toEqual(expectedResult);
-      }*/
-    }
-
-    for (const group of diffsGroupedByFilenames) {
-      try {
-        applyDiffGroup(group, testDir);
-      } catch (e) {
-        const a = 1;
       }
-
-
-      // cant find file error
-      // create new file not supported error
-      // delete file not supported error
-      // cant rename file, target filename exitsts
-
     }
+
+    const expectedResultContent = fs.readFileSync('tests/applyDiffFiles/test1.expectedresult.txt', 'utf8');
+    const resultContent = fs.readFileSync('tests/applyDiffFiles/test1.result.txt', 'utf8');
+
+    expect(resultContent).toEqual(expectedResultContent);
+  });
+
+  it('should handle multiple hunks in a single diff', () => {
+    const patch = `--- a/test1.originaltext.txt
++++ b/test1.originaltext.txt
+@@ -1,2 +1,2 @@
+ Hello world
+-This is a test file
++This is a modified test file
+@@ -3,2 +3,2 @@
+ It contains multiple lines
+-Goodbye world
++Farewell world`;
+
+    const diffsGroupedByFilenames = parsePatch(patch);
+    
+    expect(diffsGroupedByFilenames.length).toBe(1);
+    expect(diffsGroupedByFilenames[0].diffs.length).toBe(2);
+  });
+
+  it('should handle errors when file not found', () => {
+    const patch = `--- a/nonexistent.txt
++++ b/nonexistent.txt
+@@ -1,4 +1,4 @@
+ Hello world
+-This is a test file
++This is a modified test file
+ It contains multiple lines
+ Goodbye world`;
+
+    const diffsGroupedByFilenames = parsePatch(patch);
+
+    for (const diffGroup of diffsGroupedByFilenames) {
+      const oldFilePath = path.join(testDir, diffGroup.oldFileName);
+      
+      expect(() => {
+        try {
+          const fileContents = fs.readFileSync(oldFilePath, 'utf8');
+        } catch (e) {
+          throw Error(`old file ${oldFilePath} not found`);
+        }
+      }).toThrow(`old file ${oldFilePath} not found`);
+    }
+  });
+
+  it('should throw an error when hunk counts mismatch', () => {
+    const invalidPatch = `--- a/test1.originaltext.txt
++++ b/test1.originaltext.txt
+@@ -1,4 +1,4 @@
+ Hello world
+-This is a test file
++This is a modified test file
+ It contains multiple lines
+ Goodbye world
+@@ invalid hunk header will be ignored
+@@ invalid hunk header will be ignored
+ Something here`;
+
+    expect(() => parsePatch(invalidPatch)).toThrow(NotEnoughContextError);
+  });
+
+  it('should correctly apply diffs with context', () => {
+    const originalText = `Line 1
+Line 2
+Line 3
+Line 4
+Line 5`;
+    
+    const patch = `@@ -2,3 +2,3 @@
+ Line 2
+-Line 3
++Modified Line 3
+ Line 4`;
+
+    const diff = Diff.parsePatch(patch)[0];
+    const result = applyDiff(originalText, diff);
+
+    const expectedResult = `Line 1
+Line 2
+Modified Line 3
+Line 4
+Line 5`;
+
+    expect(result).toEqual(expectedResult);
   });
 });

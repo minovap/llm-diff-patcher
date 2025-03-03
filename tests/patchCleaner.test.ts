@@ -1,5 +1,5 @@
-import { cleanPatch } from '../src/utils/patchCleaner';
-import { PatchFormatError } from "../src/utils/errors";
+import { cleanPatch } from '../src';
+import {NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "../src/utils/errors";
 
 describe('cleanPatch', () => {
   test('removes empty lines around headers and updates line counts', () => {
@@ -166,13 +166,17 @@ describe('cleanPatch', () => {
 +++ b/empty.txt
 
 @@ -0,0 +1,0 @@
+ x
++y
 
 `;
 
     const expectedPatch = 
 `--- a/empty.txt
 +++ b/empty.txt
-@@ -1,0 +1,0 @@`;
+@@ -1,1 +1,2 @@
+ x
++y`;
 
     expect(cleanPatch(headerOnlyPatch)).toBe(expectedPatch);
   });
@@ -271,7 +275,7 @@ describe('cleanPatch', () => {
       }
     }
   });
-  
+
   test('allows empty lines within hunks', () => {
     const patchWithEmptyLineInHunk = `
 --- a/file.txt
@@ -288,5 +292,53 @@ describe('cleanPatch', () => {
     expect(cleaned).toContain('Hello');
     expect(cleaned).toContain('-world');
     expect(cleaned).toContain('+modified world');
+  });
+
+  test('missing context', () => {
+    const patchWithMissingContext = `
+--- a/file.txt
++++ b/file.txt
+@@ hunk #1 @@
++just a lonely row
+@@ hunk #2 @@
+ Hello
+-world
+
++modified world
+ last line`;
+
+    expect(() => cleanPatch(patchWithMissingContext)).toThrow(NotEnoughContextError);
+    try {
+      cleanPatch(patchWithMissingContext);
+    } catch (error) {
+      if (error instanceof NotEnoughContextError) {
+        expect(error.context).toBe('@@ hunk #1 @@');
+      }
+    }
+
+  });
+
+  test('no edits in hunk', () => {
+    const patchMissingContext = `
+--- a/file.txt
++++ b/file.txt
+@@ hunk #1 @@
+ just a lonely row
+@@ hunk #2 @@
+ Hello
+-world
+
++modified world
+ last line`;
+
+    expect(() => cleanPatch(patchMissingContext)).toThrow(NoEditsInHunkError);
+    try {
+      cleanPatch(patchMissingContext);
+    } catch (error) {
+      if (error instanceof NoEditsInHunkError) {
+        expect(error.context).toBe('@@ hunk #1 @@');
+      }
+    }
+
   });
 });

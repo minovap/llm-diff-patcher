@@ -25,3 +25,27 @@ export class PatchFormatError extends BaseError {
     super(message || PatchFormatError.DEFAULT_MESSAGE, context);
   }
 }
+
+export class HunkHeaderCountMismatchError extends BaseError {
+  static readonly DEFAULT_MESSAGE = `Invalid line prefix. Valid prefixes within a hunk are '+', '-', ' ', and '\\'`;
+
+  constructor(context: string = '', message?: string) {
+    super(message || HunkHeaderCountMismatchError.DEFAULT_MESSAGE, context);
+  }
+}
+
+export class NotEnoughContextError extends BaseError {
+  static readonly DEFAULT_MESSAGE = 'Hunk is missing context to apply patch';
+
+  constructor(context: string = '', message?: string) {
+    super(message || NotEnoughContextError.DEFAULT_MESSAGE, context);
+  }
+}
+
+export class NoEditsInHunkError extends BaseError {
+  static readonly DEFAULT_MESSAGE = 'Could not find any edits in hunk';
+
+  constructor(context: string = '', message?: string) {
+    super(message || NoEditsInHunkError.DEFAULT_MESSAGE, context);
+  }
+}

@@ -1,6 +1,11 @@
 import * as Diff from 'diff';
 import { ParsedDiff } from 'diff';
-import {HunkHeaderCountMismatchError, NotEnoughContextError, PatchFormatError} from "./utils/errors";
+import {
+  HunkHeaderCountMismatchError,
+  NoEditsInHunkError,
+  NotEnoughContextError,
+  PatchFormatError
+} from "./utils/errors";
 
 export function applyDiff(source: string, diff: ParsedDiff, options?: Diff.ApplyPatchOptions) {
   // check for duplicate match
@@ -161,6 +166,10 @@ export function cleanPatch(patchContent: string): string {
           );
         }
 
+        if (!foundEdit) {
+          throw new NoEditsInHunkError(cleanedLines[currentHeaderIndex]);
+        }
+        foundEdit = false;
         cleanedLines[currentHeaderIndex] = `@@ -1,${removeCount} +1,${addCount} @@`;
       }
 
@@ -231,11 +240,13 @@ export function cleanPatch(patchContent: string): string {
     }
 
     cleanedLines[currentHeaderIndex] = `@@ -1,${removeCount} +1,${addCount} @@`;
+
+    if (!foundEdit) {
+      throw new NoEditsInHunkError(cleanedLines[currentHeaderIndex]);
+    }
   }
 
-  if (!foundEdit) {
-    throw new NoEditsInHunkError();
-  }
+
 
   // Join all lines and return
   return cleanedLines.join('\n');
