@@ -1,6 +1,7 @@
 import { DiffHunkExtractor } from '../src/utils/hunkExtractor';
 import { applyHunkPatch, applyHunks, BeforeTextNotUniqueError } from '../src/utils/applyPatch';
 import * as Diff from "diff";
+import {applyDiff, parsePatch} from "../src";
 
 describe('patch application utilities', () => {
   describe('applyHunkPatch', () => {
@@ -22,6 +23,12 @@ Goodbye world`;
 -This is a test file
 +This is a modified test file
  It contains multiple lines
+ Goodbye world
+@@ ... @@
+ Hello world
+-This is a test file
++This is a modified test file
+ It contains multiple lines
  Goodbye world`;
 
       const expectedResult = `Hello world
@@ -29,13 +36,21 @@ This is a modified test file
 It contains multiple lines
 Goodbye world`;
 
-      const extractor = new DiffHunkExtractor(patch);
-      const hunk = extractor.hunks[0];
 
-      const result = applyHunkPatch(originalText, hunk);
+      const diffsGroupedByFilenames = parsePatch(patch);
 
-      expect(result.success).toBe(true);
-      expect(result.result).toEqual(expectedResult);
+      for (const group of diffsGroupedByFilenames) {
+        for (const diff of group.diffs) {
+          const result = applyDiff(originalText, diff);
+          expect(result).toEqual(expectedResult);
+        }
+      }
+
+      /*parsedDiffs.forEach((diff) => {
+        const result = applyDiff(originalText, diff);
+        expect(result).toEqual(expectedResult);
+      });*/
+
 
     });
 

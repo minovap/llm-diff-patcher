@@ -11,7 +11,7 @@ describe('findDiffs', () => {
 \`\`\`diff
 --- a/file.js
 +++ b/file.js
-@@ -1 +1 @@
+@@ ... @@
 -var x = 1;
 +let x = 1;
 
@@ -29,6 +29,10 @@ describe('findDiffs', () => {
 @@ -1 +1 @@
 -var x = 1;
 +let x = 1;
+
+@@ -1 +1 @@
+-var x = 2;
++let x = 2;
 
 --- a/file2.js
 +++ b/file2.js
