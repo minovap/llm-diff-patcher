@@ -1,8 +1,9 @@
-import {applyDiff, parsePatch} from "../src";
+import { parsePatch } from "../src/utils/parsePatch";
 import fs from 'fs';
 import path from 'path';
 import * as Diff from "diff";
 import {HunkHeaderCountMismatchError, NotEnoughContextError} from "../src/utils/errors";
+import {applyDiff} from "../src/utils/applyDiff";
 
 const testDir = path.join(__dirname, 'applyDiffFiles');
 

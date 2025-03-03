@@ -1,15 +1,7 @@
 import * as Diff from 'diff';
-import { ParsedDiff } from 'diff';
-import {
-  HunkHeaderCountMismatchError,
-} from "./utils/errors";
-import {cleanPatch} from "./utils/cleanPatch";
-
-export function applyDiff(source: string, diff: ParsedDiff, options?: Diff.ApplyPatchOptions) {
-  // check for duplicate match
-  // error handling
-  return Diff.applyPatch(source, diff, options);
-}
+import {ParsedDiff} from 'diff';
+import {HunkHeaderCountMismatchError,} from "./errors";
+import {cleanPatch} from "./cleanPatch";
 
 export interface DiffsGroupedByFilenames {
   oldFileName: string
