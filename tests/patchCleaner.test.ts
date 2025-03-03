@@ -1,4 +1,4 @@
-import { cleanPatch } from '../src';
+import { cleanPatch } from '../src/utils/cleanPatch';
 import {NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "../src/utils/errors";
 
 describe('cleanPatch', () => {
