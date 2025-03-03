@@ -1,0 +1,4 @@
+Hello world
+This is a modified test file
+It contains multiple lines
+Goodbye world

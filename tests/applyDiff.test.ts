@@ -2,8 +2,9 @@ import { parsePatch } from "../src/utils/parsePatch";
 import fs from 'fs';
 import path from 'path';
 import * as Diff from "diff";
-import {HunkHeaderCountMismatchError, NotEnoughContextError} from "../src/utils/errors";
+import { NotEnoughContextError} from "../src/utils/errors";
 import {applyDiff} from "../src/utils/applyDiff";
+import {applyPatchToFiles} from "../src";
 
 const testDir = path.join(__dirname, 'applyDiffFiles');
 
@@ -30,28 +31,9 @@ describe('applyDiff', () => {
  It contains multiple lines
  Goodbye world`;
 
-    const diffsGroupedByFilenames = parsePatch(patch);
-
-    for (const diffGroup of diffsGroupedByFilenames) {
-      const oldFilePath = path.join(testDir, diffGroup.oldFileName);
-      const newFilePath = path.join(testDir, diffGroup.newFileName);
-      let fileContents;
-
-      try {
-        fileContents = fs.readFileSync(oldFilePath, 'utf8');
-      } catch (e) {
-        throw Error(`old file ${oldFilePath} not found`);
-      }
-
-      for (const diff of diffGroup.diffs) {
-        const result = applyDiff(fileContents, diff);
-
-        if (result) {
-          // Save the result to a file
-          fs.writeFileSync(newFilePath, result, 'utf8');
-        }
-      }
-    }
+    const result = applyPatchToFiles(patch, {
+      basePath: testDir,
+    });
 
     const expectedResultContent = fs.readFileSync('tests/applyDiffFiles/test1.expectedresult.txt', 'utf8');
     const resultContent = fs.readFileSync('tests/applyDiffFiles/test1.result.txt', 'utf8');
