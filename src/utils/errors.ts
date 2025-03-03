@@ -49,3 +49,12 @@ export class NoEditsInHunkError extends BaseError {
     super(message || NoEditsInHunkError.DEFAULT_MESSAGE, context);
   }
 }
+
+export class InsufficientContextLinesError extends BaseError {
+  static readonly DEFAULT_MESSAGE = 'Insufficient context lines in hunk';
+
+  constructor(context: string = '', required: number, actual: number) {
+    const message = `${InsufficientContextLinesError.DEFAULT_MESSAGE}: required ${required}, found ${actual}`;
+    super(message, context);
+  }
+}

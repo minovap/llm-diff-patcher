@@ -1,7 +1,35 @@
 import { cleanPatch } from '../src/utils/cleanPatch';
-import {NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "../src/utils/errors";
+import {
+  InsufficientContextLinesError,
+  NoEditsInHunkError,
+  NotEnoughContextError,
+  PatchFormatError
+} from "../src/utils/errors";
 
 describe('cleanPatch', () => {
+
+  test('minimum context lines = 10', () => {
+    const multiEmptyPatch =
+      `--- a/test1.originaltext.txt
++++ b/test1.originaltext.txt
+@@ -1,4 +1,4 @@
+ Hello world
+-This is a test file
++This is a modified test file
+ It contains multiple lines
+ Goodbye world`;
+
+    expect(() => cleanPatch(multiEmptyPatch, 10)).toThrow(InsufficientContextLinesError);
+
+    try {
+      cleanPatch(multiEmptyPatch, 10);
+    } catch (error) {
+      if (error instanceof InsufficientContextLinesError) {
+        expect(error.message).toBe('Insufficient context lines in hunk: required 10, found 4');
+      }
+    }
+  });
+
   test('removes empty lines around headers and updates line counts', () => {
     const originalPatch = `
 --- a/test1.originaltext.txt
@@ -59,8 +87,8 @@ describe('cleanPatch', () => {
   });
 
   test('handles patches with multiple empty lines', () => {
-    const multiEmptyPatch = 
-`--- a/test1.originaltext.txt
+    const multiEmptyPatch =
+      `--- a/test1.originaltext.txt
 
 
 +++ b/test1.originaltext.txt
@@ -75,8 +103,8 @@ describe('cleanPatch', () => {
  It contains multiple lines
  Goodbye world`;
 
-    const expectedPatch = 
-`--- a/test1.originaltext.txt
+    const expectedPatch =
+      `--- a/test1.originaltext.txt
 +++ b/test1.originaltext.txt
 @@ -1,4 +1,4 @@
  Hello world

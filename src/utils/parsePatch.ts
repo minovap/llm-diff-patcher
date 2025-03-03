@@ -1,12 +1,16 @@
 import * as Diff from 'diff';
 import {ParsedDiff} from 'diff';
-import {HunkHeaderCountMismatchError,} from "./errors";
+import {HunkHeaderCountMismatchError, InsufficientContextLinesError} from "./errors";
 import {cleanPatch} from "./cleanPatch";
 
 export interface DiffsGroupedByFilenames {
   oldFileName: string
   newFileName: string
   diffs: ParsedDiff[]
+}
+
+export interface ParsePatchOptions {
+  minContextLines?: number;
 }
 
 /**
@@ -32,8 +36,9 @@ export function countHunkHeaders(patch: string): number {
   return count;
 }
 
-export function parsePatch(_patch: string) {
-  const patch = cleanPatch(_patch);
+export function parsePatch(_patch: string, options?: ParsePatchOptions) {
+  const minContextLines = options?.minContextLines;
+  const patch = cleanPatch(_patch, minContextLines);
 
   const parsedDiffs: ParsedDiff[] = Diff.parsePatch(patch);
   const result: DiffsGroupedByFilenames[] = [];

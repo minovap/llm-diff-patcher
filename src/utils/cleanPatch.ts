@@ -1,4 +1,4 @@
-import {NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "./errors";
+import {InsufficientContextLinesError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "./errors";
 
 /**
  * Utility to clean up patch files:
@@ -6,12 +6,15 @@ import {NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "./err
  * - Removes empty lines around headers (---, +++, @@)
  * - Updates line counts in @@ headers based on actual content
  * - Validates all line prefixes within hunks
+ * - Verifies minimum number of context lines if specified
  *
  * @param patchContent - The patch string to clean
+ * @param minContextLines - Minimum number of context lines required (lines starting with " " or "-")
  * @returns The cleaned patch string
  * @throws {PatchFormatError} When encountering invalid line prefixes within a hunk
+ * @throws {InsufficientContextLinesError} When there are not enough context lines
  */
-export function cleanPatch(patchContent: string): string {
+export function cleanPatch(patchContent: string, minContextLines?: number): string {
   // Return early if empty
   if (!patchContent) {
     return '';
@@ -36,6 +39,7 @@ export function cleanPatch(patchContent: string): string {
   let currentHeaderIndex: number = -1;
   let removeCount: number = 0;
   let addCount: number = 0;
+  let contextLines: number = 0;
 
   // Define valid line prefixes
   const validPrefixes = ['+', '-', ' ', '\\'];
@@ -64,7 +68,7 @@ export function cleanPatch(patchContent: string): string {
 
     // Check if line is a hunk header (@@ -x,y +x,y @@)
     if (line.startsWith('@@')) {
-      // If we were in a hunk before, update the previous header
+      // If we were in a hunk before, update the previous header and check context lines
       if (inHunk && currentHeaderIndex !== -1) {
         if (removeCount === 0) {
           throw new NotEnoughContextError(
@@ -75,6 +79,16 @@ export function cleanPatch(patchContent: string): string {
         if (!foundEdit) {
           throw new NoEditsInHunkError(cleanedLines[currentHeaderIndex]);
         }
+
+        // Check minimum context lines if specified
+        if (minContextLines !== undefined && contextLines < minContextLines) {
+          throw new InsufficientContextLinesError(
+            cleanedLines[currentHeaderIndex],
+            minContextLines,
+            contextLines
+          );
+        }
+
         foundEdit = false;
         cleanedLines[currentHeaderIndex] = `@@ -1,${removeCount} +1,${addCount} @@`;
       }
@@ -82,6 +96,7 @@ export function cleanPatch(patchContent: string): string {
       // Reset counters for the new hunk
       removeCount = 0;
       addCount = 0;
+      contextLines = 0;
       inHunk = true;
 
       // Skip empty lines before header
@@ -120,9 +135,11 @@ export function cleanPatch(patchContent: string): string {
         } else if (operation === '-') {
           removeCount++;
           foundEdit = true;
+          contextLines++;
         } else if (operation === ' ') {
           addCount++;
           removeCount++;
+          contextLines++;
         }
       } else {
         // Throw error for invalid line prefix
@@ -137,7 +154,7 @@ export function cleanPatch(patchContent: string): string {
     }
   }
 
-  // Update the last header if needed
+  // Update the last header if needed and check context lines
   if (inHunk && currentHeaderIndex !== -1) {
     if (removeCount === 0) {
       throw new NotEnoughContextError(
@@ -145,14 +162,21 @@ export function cleanPatch(patchContent: string): string {
       );
     }
 
-    cleanedLines[currentHeaderIndex] = `@@ -1,${removeCount} +1,${addCount} @@`;
-
     if (!foundEdit) {
       throw new NoEditsInHunkError(cleanedLines[currentHeaderIndex]);
     }
+
+    // Check minimum context lines if specified
+    if (minContextLines !== undefined && contextLines < minContextLines) {
+      throw new InsufficientContextLinesError(
+        cleanedLines[currentHeaderIndex],
+        minContextLines,
+        contextLines
+      );
+    }
+
+    cleanedLines[currentHeaderIndex] = `@@ -1,${removeCount} +1,${addCount} @@`;
   }
-
-
 
   // Join all lines and return
   return cleanedLines.join('\n');

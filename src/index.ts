@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Diff from 'diff';
-import { parsePatch, DiffsGroupedByFilenames } from './utils/parsePatch';
+import { parsePatch, DiffsGroupedByFilenames, ParsePatchOptions } from './utils/parsePatch';
 import { applyDiff } from './utils/applyDiff';
-import { BaseError, HunkHeaderCountMismatchError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError } from './utils/errors';
+import { BaseError, HunkHeaderCountMismatchError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError, InsufficientContextLinesError } from './utils/errors';
 
 /**
  * Error class for file operation errors
@@ -81,6 +81,7 @@ export interface ApplyDiffOptions {
   basePath?: string;
   dryRun?: boolean;
   jsDiffApplyPatchOptions?: Diff.ApplyPatchOptions;
+  minContextLines?: number;
 }
 
 /**
@@ -93,11 +94,13 @@ export function applyPatchToFiles(patchString: string, options: {
   basePath: string;
   dryRun?: boolean;
   jsDiffApplyPatchOptions?: Diff.ApplyPatchOptions;
+  minContextLines?: number;
 }): ApplyDiffResult {
   const {
     basePath = process.cwd(),
     dryRun = false,
-    jsDiffApplyPatchOptions = {}
+    jsDiffApplyPatchOptions = {},
+    minContextLines
   } = options;
   
   // Initialize the result object
@@ -114,8 +117,13 @@ export function applyPatchToFiles(patchString: string, options: {
   };
 
   try {
-    // Parse the patch
-    const diffsGroupedByFilenames = parsePatch(patchString);
+    // Parse the patch with minContextLines option
+    const parseOptions: ParsePatchOptions = {};
+    if (minContextLines !== undefined) {
+      parseOptions.minContextLines = minContextLines;
+    }
+    
+    const diffsGroupedByFilenames = parsePatch(patchString, parseOptions);
     result.totalFiles = diffsGroupedByFilenames.length;
     
     // Process each file diff
@@ -263,4 +271,11 @@ function applyDiffToFile(
 
 // Export other utilities that might be useful
 export { parsePatch, applyDiff, cleanPatch } from './utils';
-export { BaseError, PatchFormatError, HunkHeaderCountMismatchError, NotEnoughContextError, NoEditsInHunkError } from './utils/errors';
+export { 
+  BaseError, 
+  PatchFormatError, 
+  HunkHeaderCountMismatchError, 
+  NotEnoughContextError, 
+  NoEditsInHunkError,
+  InsufficientContextLinesError 
+} from './utils/errors';
