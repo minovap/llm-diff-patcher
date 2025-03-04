@@ -1,5 +1,8 @@
 import {InsufficientContextLinesError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError} from "./errors";
 
+// Define valid line prefixes
+const validPrefixes = ['+', '-', ' ', '\\', '@'];
+
 /**
  * Utility to clean up patch files:
  * - Trims empty lines from the beginning and end of the patch
@@ -26,8 +29,22 @@ export function cleanPatch(patchContent: string, minContextLines?: number): stri
   // First, trim the entire patch to remove empty lines at beginning and end
   patchContent = patchContent.trim();
 
-  // Split the patch into lines
-  const lines: string[] = patchContent.split('\n');
+  let lines: string[] = patchContent.split('\n');
+
+  // remove empty lines
+  lines = lines.filter((line) => line !== '');
+
+  // validate line prefixes
+  lines.forEach(line => {
+    const operation = line[0];
+    // Check if first character is not in validPrefixes
+    if (!validPrefixes.includes(operation)) {
+      throw new PatchFormatError(
+        line,
+        `Invalid line prefix: '${operation}'. Valid prefixes within a hunk are '+', '-', ' ', and '\\'`
+      );
+    }
+  })
 
   // Create a new array to store cleaned lines
   const cleanedLines: string[] = [];
@@ -41,17 +58,13 @@ export function cleanPatch(patchContent: string, minContextLines?: number): stri
   let addCount: number = 0;
   let contextLines: number = 0;
 
-  // Define valid line prefixes
-  const validPrefixes = ['+', '-', ' ', '\\'];
-
   // Process each line
   for (let i = 0; i < lines.length; i++) {
     const line: string = lines[i];
 
     // Check if line is a file header (--- or +++)
     if (line.startsWith('---') || line.startsWith('+++')) {
-      // Skip empty lines before header
-      if (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1] === '') {
+      while (cleanedLines.length > 0 && cleanedLines[cleanedLines.length - 1].trim() === '') {
         cleanedLines.pop();
       }
 
@@ -118,35 +131,21 @@ export function cleanPatch(patchContent: string, minContextLines?: number): stri
 
     // Process content lines
     if (inHunk) {
-      if (line.trim() === '') {
-        // Empty lines within hunks are allowed
-        cleanedLines.push(line);
-        continue;
-      }
-
       const operation = line[0];
 
-      if (validPrefixes.includes(operation)) {
-        cleanedLines.push(line);
+      cleanedLines.push(line);
 
-        if (operation === '+') {
-          addCount++;
-          foundEdit = true;
-        } else if (operation === '-') {
-          removeCount++;
-          foundEdit = true;
-          contextLines++;
-        } else if (operation === ' ') {
-          addCount++;
-          removeCount++;
-          contextLines++;
-        }
-      } else {
-        // Throw error for invalid line prefix
-        throw new PatchFormatError(
-          line,
-          `Invalid line prefix: '${operation}'. Valid prefixes within a hunk are '+', '-', ' ', and '\\'`
-        );
+      if (operation === '+') {
+        addCount++;
+        foundEdit = true;
+      } else if (operation === '-') {
+        removeCount++;
+        foundEdit = true;
+        contextLines++;
+      } else if (operation === ' ') {
+        addCount++;
+        removeCount++;
+        contextLines++;
       }
     } else {
       // If we're not in a hunk, just add the line

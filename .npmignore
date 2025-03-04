@@ -1,0 +1,15 @@
+# Source files
+src/
+tests/
+
+# Configuration files
+tsconfig.json
+jest.config.js
+.gitignore
+
+# IDE files
+.idea/
+.vscode/
+
+# Git files
+.git/
