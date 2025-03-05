@@ -1,0 +1,23 @@
+--- novelcrafter/NovelManager.ts
++++ novelcrafter/NovelManager.ts
+@@ -30,8 +30,19 @@
+     codexEntries: {},
+   };
+
+  constructor() {}
++  private constructor(novel?: any, novelDetails?: any) {
++    this.novel = novel;
++    this.novelDetails = novelDetails;
++  }
+
++  static async create(novelId: string): Promise<NovelManager> {
++    const instance = new NovelManager();
++    await instance.initialize(novelId);
++    return instance;
++  }
++
++  // This method is now private and used by the static create method
++  private async initialize(novelId: string) {
+   async initialize(novelId: string) {
+     this.novel = await api.novels.getOne.query(novelId);
+     this.novelDetails = await api.novelDetails.getOne.query({ novelId, modelId: novelId });

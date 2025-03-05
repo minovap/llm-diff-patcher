@@ -1,0 +1,120 @@
+import { api } from './api/root';
+import sleep from 'sleep-promise';
+import { Act, Chapter, ChapterAttributes, CodexEntry, CodexEntryType, NovelDetails, Paragraph, Scene, SceneAttributes, SceneContent, createAct, createChapter, createCodexEntry, createNovel, createNovelDetails, createScene } from './types';
+import getUser from "./utils/getUser";
+
+class NovelManager {
+  user: any;
+  novel: any;
+  novelDetails: any;
+  db: {
+    acts: {
+      [actId: string]: Act,
+    };
+    chapters: {
+      [chapterId: string]: Chapter,
+    };
+    novels: {
+      [novelId: string]: NovelManager,
+    };
+    novelDetails: {
+      [novelDetailId: string]: NovelDetails,
+    };
+    scenes: {
+      [sceneId: string]: Scene,
+    };
+    codexEntries: {
+      [sceneId: string]: CodexEntry,
+    };
+  } = {
+    acts: {},
+    chapters: {},
+    novels: {},
+    novelDetails: {},
+    scenes: {},
+    codexEntries: {},
+  };
+
+  constructor() {}
+
+  async initialize(novelId: string) {
+    this.novel = await api.novels.getOne.query(novelId);
+    this.novelDetails = await api.novelDetails.getOne.query({ novelId, modelId: novelId });
+    const data = await api.data.getAll.query(novelId);
+
+    for (const d of data) {
+      if (!(d.type in this.db)) {
+        console.log(`Type of "${d.type}" not found in this.db. It needs to be implemented.`);
+        process.exit();
+      }
+      this.db[d.type][d.id] = d;
+    }
+  }
+
+  static async getAllNovels() {
+    return api.novels.getAll.query();
+  }
+
+  async addAct(title: string) {
+    const act = createAct(this.novelDetails);
+    act.attributes.title = title;
+    const r = await api.data.commit.mutate({
+      novelId: this.novel.id,
+      transaction: {
+        upsert: [act, this.novelDetails]
+      }
+    });
+
+    return act;
+  }
+
+  async addChapter(act: Act, attributes: ChapterAttributes): Promise<Chapter> {
+    const chapter = createChapter(act);
+    chapter.attributes = attributes;
+
+    await api.data.commit.mutate({
+      novelId: this.novel.id,
+      transaction: {
+        upsert: [act, chapter]
+      }
+    });
+
+    return chapter;
+  }
+
+  async addScene(chapter: Chapter, attributes: SceneAttributes): Promise<Scene> {
+    const scene = createScene(chapter);
+    scene.attributes = attributes;
+
+    await api.data.commit.mutate({
+      novelId: this.novel.id,
+      transaction: {
+        upsert: [chapter, scene],
+      }
+    });
+
+    return scene;
+  }
+
+  async addCodexEntry(codexEntryType: CodexEntryType, name: string): Promise<CodexEntry> {
+    const codexEntry = createCodexEntry();
+    codexEntry.attributes.type = codexEntryType;
+    codexEntry.attributes.name = name;
+
+    await api.data.commit.mutate({
+      novelId: this.novel.id,
+      transaction: {
+        upsert: [codexEntry],
+      }
+    });
+
+    return codexEntry;
+  }
+
+  getActs(): Act[] {
+    return Object.values(this.db.acts);
+  }
+
+}
+
+export default NovelManager;

@@ -28,7 +28,8 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "diff": "^7.0.0"
+    "diff": "^7.0.0",
+    "unidiff": "^1.0.4"
   },
   "files": [
     "dist"
