@@ -25,3 +25,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Test result files
+tests/aiderPythonVsTypescript/*-result-*.txt
+src/aider/__pycache__
