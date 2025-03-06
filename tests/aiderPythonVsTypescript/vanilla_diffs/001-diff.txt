@@ -1,0 +1,15 @@
+```diff
+ function calculateSum(a, b) {
+   // Add two numbers and return result
+   return a + b;
+ }
+ 
++function calculateMultiply(a, b) {
++  // Multiply two numbers and return result
++  return a * b;
++}
++
+ function displayResult(result) {
+   console.log("The result is: " + result);
+ }
+```

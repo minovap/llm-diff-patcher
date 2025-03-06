@@ -27,5 +27,7 @@ yarn-error.log*
 *.sw?
 
 # Test result files
-tests/aiderPythonVsTypescript/*-result-*.txt
+tests/aiderPythonVsTypescript/**/*-result-*.txt
 src/aider/__pycache__
+
+*.DS_Store

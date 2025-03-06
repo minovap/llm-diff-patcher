@@ -1,0 +1,21 @@
+class User {
+  private name: string;
+  private email: string;
+  
+  constructor(name: string, email: string) {
+    this.name = name;
+    this.email = email;
+  }
+  
+  getName(): string {
+    return this.name;
+  }
+  
+  getEmail(): string {
+    return this.email;
+  }
+}
+
+// Create a new user
+const user = new User("John Doe", "john@example.com");
+console.log(user.getName());

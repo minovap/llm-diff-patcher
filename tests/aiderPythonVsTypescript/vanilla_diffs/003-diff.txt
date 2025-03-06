@@ -1,0 +1,32 @@
+```diff
+ const inventory = [
+   { id: 1, name: "Laptop", price: 999.99, stock: 15 },
+   { id: 2, name: "Mouse", price: 29.99, stock: 50 },
+   { id: 3, name: "Keyboard", price: 59.99, stock: 30 },
+   { id: 4, name: "Monitor", price: 199.99, stock: 10 },
+ ];
+ 
+ function getItemById(id) {
+   return inventory.find(item => item.id === id);
+ }
+ 
++function getTotalValue() {
++  return inventory.reduce((total, item) => {
++    return total + (item.price * item.stock);
++  }, 0);
++}
++
+-function displayInventory() {
++function displayInventory(sortByPrice = false) {
++  const items = [...inventory];
++  
++  if (sortByPrice) {
++    items.sort((a, b) => a.price - b.price);
++  }
++  
+-  inventory.forEach(item => {
++  items.forEach(item => {
+     console.log(`${item.name}: $${item.price} (${item.stock} in stock)`);
+   });
+ }
+```
