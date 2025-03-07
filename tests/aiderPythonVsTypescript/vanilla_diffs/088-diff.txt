@@ -1,0 +1,49 @@
+```diff
+--- test_files/088-original.txt	2025-03-07 19:06:19
++++ test_files/088-modified.txt	2025-03-07 19:06:19
+@@ -2,6 +2,8 @@
+ Test `composio add`
+ """
+ 
++import re
++
+ from tests.test_cli.base import BaseCliTest
+ 
+ 
+@@ -10,8 +12,33 @@
+ 
+     def test_no_auth(self) -> None:
+         """Test `composio add` with no-auth."""
+-        self.run("add", "scheduler")
++        self.run("add", "codeinterpreter")
+         self.assert_exit_code(code=1)
+         self.assert_stderr(
+-            match="Scheduler does not require authentication",
++            match="codeinterpreter does not require authentication",
+         )
++
++    def test_add_github(self) -> None:
++        """Test `composio add` with no-auth."""
++        self.run("add", "github", input="n")
++        self.assert_stdout_regex(
++            match=re.compile(
++                "Do you want to replace the existing connection?|Adding integration..."
++            ),
++        )
++
++    def test_add_serpapi(self) -> None:
++        """Test `composio add` with no-auth."""
++        self.run("add", "serpapi", input="y")
++        self.assert_stdout_regex(
++            match=re.compile("Enter API Key"),
++        )
++
++    def test_add_auth_mode_auto_uppercase(self) -> None:
++        """Test `composio add` with lowercase --auth-mode."""
++        self.run("add", "github", "--auth-mode", "oauth2", input="n")
++        self.assert_stdout_regex(
++            match=re.compile(
++                "Do you want to replace the existing connection?|Adding integration..."
++            ),
++        )
+```

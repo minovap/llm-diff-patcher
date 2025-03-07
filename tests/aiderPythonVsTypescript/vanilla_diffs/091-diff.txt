@@ -1,0 +1,10 @@
+```diff
+--- test_files/091-original.txt	2025-03-07 19:06:19
++++ test_files/091-modified.txt	2025-03-07 19:06:19
+@@ -11,4 +11,4 @@
+ def test_raise_invalid_api_key() -> None:
+     """Test invalid API key."""
+     with pytest.raises(ComposioClientError, match="API Key is not valid!"):
+-        Composio(api_key="API_KEY")
++        _ = Composio.validate_api_key(key="API_KEY")
+```

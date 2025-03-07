@@ -1,0 +1,11 @@
+```diff
+--- test_files/103-original.txt	2025-03-07 19:06:21
++++ test_files/103-modified.txt	2025-03-07 19:06:21
+@@ -37,3 +37,6 @@
+     issue_id: t.Optional[str] = None
+     base_commit_id: t.Optional[str] = None
+     issue_desc: t.Optional[str] = None
++    test_command: t.Optional[str] = None
++    eval_script: t.Optional[str] = None
++    install_repo_script: t.Optional[str] = None
+```

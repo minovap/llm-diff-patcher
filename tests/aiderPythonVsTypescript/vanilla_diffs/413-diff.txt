@@ -1,0 +1,118 @@
+```diff
+--- test_files/413-original.txt	2025-03-07 19:06:54
++++ test_files/413-modified.txt	2025-03-07 19:06:54
+@@ -3,66 +3,76 @@
+ """
+ 
+ import typing as t
+-from asyncio import AbstractEventLoop
+ 
+-from aiohttp import ClientSession as AsyncSession
++from requests import ReadTimeout
+ from requests import Session as SyncSession
+ 
++from composio.__version__ import __version__
++from composio.exceptions import SDKTimeoutError
++from composio.utils import logging
++from composio.utils.shared import generate_request_id
+ 
+-class AsyncHttpClient(AsyncSession):
+-    """Async HTTP client for Composio"""
+ 
++DEFAULT_RUNTIME = "composio"
++SOURCE_HEADER = "python_sdk"
++DEFAULT_REQUEST_TIMEOUT = 60.0
++
++
++class HttpClient(SyncSession, logging.WithLogger):
++    """HTTP client for Composio"""
++
+     def __init__(
+         self,
+         base_url: str,
+         api_key: str,
+-        loop: t.Optional[AbstractEventLoop] = None,
++        runtime: t.Optional[str] = None,
++        timeout: t.Optional[float] = None,
+     ) -> None:
+         """
+-        Initialize async client channel for Composio API
+-
+-        :param base_url: Base URL for Composio API
+-        :param api_key: API key for Composio API
+-        :param loop: Event for execution requests
+-        """
+-        super().__init__(loop=loop, headers={"x-api-key": api_key})
+-        self.base_url = base_url
+-
+-    def _wrap(self, method: t.Callable) -> t.Callable:
+-        """Wrap http request."""
+-
+-        def request(url: str, **kwargs: t.Any) -> t.Any:
+-            """Perform HTTP request."""
+-            return method(url=f"{self.base_url}{url}", **kwargs)
+-
+-        return request
+-
+-    def __getattribute__(self, name: str) -> t.Any:
+-        if name in ("get", "post", "put", "delete"):
+-            return self._wrap(super().__getattribute__(name))
+-        return super().__getattribute__(name)
+-
+-
+-class HttpClient(SyncSession):
+-    """Async HTTP client for Composio"""
+-
+-    def __init__(self, base_url: str, api_key: str) -> None:
+-        """
+         Initialize client channel for Composio API
+ 
+         :param base_url: Base URL for Composio API
+         :param api_key: API key for Composio API
++        :param runtime: Runtime specifier
++        :param timeout: Request timeout
+         """
+-        super().__init__()
++        SyncSession.__init__(self)
++        logging.WithLogger.__init__(self)
+         self.base_url = base_url
+-        self.headers.update({"x-api-key": api_key})
++        self.headers.update(
++            {
++                "x-api-key": api_key,
++                "x-source": SOURCE_HEADER,
++                "x-runtime": runtime or DEFAULT_RUNTIME,
++                "x-composio-version": __version__,
++            }
++        )
++        self.timeout = timeout or DEFAULT_REQUEST_TIMEOUT
+ 
+     def _wrap(self, method: t.Callable) -> t.Callable:
+         """Wrap http request."""
+ 
+         def request(url: str, **kwargs: t.Any) -> t.Any:
+             """Perform HTTP request."""
+-            return method(url=f"{self.base_url}{url}", **kwargs)
++            rid = generate_request_id()
++            self._logger.debug(
++                f"[{rid}] {method.__name__.upper()} {self.base_url}{url} - {kwargs}"
++            )
++            retries = 0
++            while retries < 3:
++                try:
++                    return method(
++                        url=f"{self.base_url}{url}",
++                        timeout=self.timeout,
++                        headers={
++                            **kwargs.pop("headers", {}),
++                            "x-request-id": rid,
++                        },
++                        **kwargs,
++                    )
++                except ReadTimeout:
++                    retries += 1
++            raise SDKTimeoutError("Timed out while waiting for request to complete")
+ 
+         return request
+ 
+```

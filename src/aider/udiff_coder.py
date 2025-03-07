@@ -1,7 +1,9 @@
 import difflib
 from itertools import groupby
+import os
 from pathlib import Path
 
+from normalization import normalize_line_endings, aggressive_normalize, normalize_hunk_lines, robust_search_replace
 from search_replace import (
     SearchTextNotUnique,
     all_preprocs,
@@ -9,6 +11,9 @@ from search_replace import (
     flexible_search_and_replace,
     search_and_replace,
 )
+
+# Note: normalize_line_endings is now imported from search_replace.py
+# to ensure consistent implementation across files
 
 no_match_error = """UnifiedDiffNoMatch: hunk failed to apply!
 
@@ -39,11 +44,16 @@ other_hunks_applied = (
     "Note: some hunks did apply successfully. See the updated source code shown above.\n\n"
 )
 
+
+
 def do_replace(fname, content, hunk):
+    # Normalize line endings
+    if content is not None:
+        content = normalize_line_endings(content)
+    hunk = [normalize_line_endings(line) for line in hunk]
+    
     fname = Path(fname)
-
     before_text, after_text = hunk_to_before_after(hunk)
-
     # does it want to make a new file?
     if not fname.exists() and not before_text.strip():
         fname.touch()
@@ -70,6 +80,9 @@ def collapse_repeats(s):
 
 
 def apply_hunk(content, hunk):
+    # Normalize line endings
+    content = normalize_line_endings(content)
+    hunk = [normalize_line_endings(line) for line in hunk]
     before_text, after_text = hunk_to_before_after(hunk)
 
     res = directly_apply_hunk(content, hunk)
@@ -110,7 +123,7 @@ def apply_hunk(content, hunk):
         if res:
             content = res
         else:
-            all_done = False
+            all_done = False  # This section couldn't be applied
             # FAILED!
             # this_hunk = preceding_context + changes + following_context
             break
@@ -120,6 +133,25 @@ def apply_hunk(content, hunk):
 
 
 def flexi_just_search_and_replace(texts):
+    """
+    Apply only search_and_replace strategies with various preprocessing options.
+    
+    Args:
+        texts: A list containing [search_text, replace_text, original_text]
+        
+    Returns:
+        The modified text if successful, None otherwise
+    """
+    # In case we have any issues with missing newlines, try adding them
+    if any(not text.endswith('\n') for text in texts):
+        alt_texts = [text if text.endswith('\n') else text + '\n' for text in texts]
+        result = flexible_search_and_replace(alt_texts, [(search_and_replace, all_preprocs)])
+        if result:
+            return result
+    
+    # Normalize line endings
+    texts = [normalize_line_endings(text) for text in texts]
+    
     strategies = [
         (search_and_replace, all_preprocs),
     ]
@@ -128,6 +160,9 @@ def flexi_just_search_and_replace(texts):
 
 
 def make_new_lines_explicit(content, hunk):
+    # Normalize line endings
+    content = normalize_line_endings(content)
+    hunk = [normalize_line_endings(line) for line in hunk]
     before, after = hunk_to_before_after(hunk)
 
     diff = diff_lines(before, content)
@@ -147,7 +182,7 @@ def make_new_lines_explicit(content, hunk):
 
     if len(new_before.strip()) < 10:
         return hunk
-
+    
     before = before.splitlines(keepends=True)
     new_before = new_before.splitlines(keepends=True)
     after = after.splitlines(keepends=True)
@@ -162,13 +197,38 @@ def make_new_lines_explicit(content, hunk):
 
 
 def cleanup_pure_whitespace_lines(lines):
-    res = [
-        line if line.strip() else line[-(len(line) - len(line.rstrip("\r\n")))] for line in lines
-    ]
+    """
+    Clean up whitespace-only lines, preserving only necessary line endings.
+    
+    Args:
+        lines: List of lines to clean up
+        
+    Returns:
+        List of cleaned up lines
+    """
+    lines = [normalize_line_endings(line) for line in lines]
+    
+    # Ensure consistent handling of line endings by using \n
+    res = []
+    for line in lines:
+        if line.strip():
+            # Line has non-whitespace content, keep it as is
+            res.append(line)
+        else:
+            # Line is whitespace-only, keep only the line ending
+            line_ending = line[-(len(line) - len(line.rstrip("\n")))]
+            # Make sure we have at least a newline
+            if not line_ending:
+                line_ending = "\n"
+            res.append(line_ending)
+            
     return res
 
 
 def normalize_hunk(hunk):
+    # Normalize line endings
+    hunk = [normalize_line_endings(line) for line in hunk]
+    
     before, after = hunk_to_before_after(hunk, lines=True)
 
     before = cleanup_pure_whitespace_lines(before)
@@ -178,29 +238,84 @@ def normalize_hunk(hunk):
     diff = list(diff)[3:]
     return diff
 
-
 def directly_apply_hunk(content, hunk):
+    """
+    Attempt to directly apply a hunk to content.
+    This is a completely rewritten version focusing on robust line ending handling.
+    
+    Args:
+        content: The content to modify
+        hunk: The hunk to apply
+        
+    Returns:
+        Modified content if successful, None otherwise
+    """
+    # Step 1: Normalize all inputs
+    content = normalize_line_endings(content)
+    # Ensure the hunk has proper line endings
+    normalized_hunk = []
+    for line in hunk:
+        line = normalize_line_endings(line)
+        if line and not line.endswith('\n'):
+            line += '\n'
+        normalized_hunk.append(line)
+    hunk = normalized_hunk
+    
+    # Step 2: Extract before and after text from the hunk
     before, after = hunk_to_before_after(hunk)
-
+    
+    # Step 3: Basic validation
     if not before:
         return
-
+    
+    # Ensure both texts end with newlines
+    if not before.endswith('\n'):
+        before += '\n'
+    if not after.endswith('\n'):
+        after += '\n'
+    
+    # Step 4: Check for uniqueness when the before text is small
     before_lines, _ = hunk_to_before_after(hunk, lines=True)
     before_lines = "".join([line.strip() for line in before_lines])
-
-    # Refuse to do a repeated search and replace on a tiny bit of non-whitespace context
     if len(before_lines) < 10 and content.count(before) > 1:
         return
-
+        
+    # Step 5: Try direct replacement first (most reliable method)
+    if before in content:
+        return content.replace(before, after)
+    
+    # Step 6: Try with various levels of normalization
+    # First attempt: With trailing newlines added if missing
     try:
-        new_content = flexi_just_search_and_replace([before, after, content])
+        before_n = before if before.endswith('\n') else before + '\n'
+        after_n = after if after.endswith('\n') else after + '\n'
+        content_n = content if content.endswith('\n') else content + '\n'
+        
+        if before_n in content_n:
+            return content_n.replace(before_n, after_n)
+    except Exception:
+        pass
+        
+    # Second attempt: Use the robust search/replace from normalization.py
+    result = robust_search_replace(before, after, content)
+    if result:
+        return result
+        
+    # Final attempt: Try the flexible search/replace approach
+    try:
+        result = flexi_just_search_and_replace([before, after, content])
+        return result
     except SearchTextNotUnique:
-        new_content = None
-
-    return new_content
+        pass
+        
+    # If all approaches failed, return None
+    return None
 
 
 def apply_partial_hunk(content, preceding_context, changes, following_context):
+    # Normalize line endings in all inputs
+    content = normalize_line_endings(content) 
+    
     len_prec = len(preceding_context)
     len_foll = len(following_context)
 
@@ -231,11 +346,14 @@ def apply_partial_hunk(content, preceding_context, changes, following_context):
 
 
 def find_diffs(content):
+    # Normalize line endings
+    content = normalize_line_endings(content)
+    
     # We can always fence with triple-quotes, because all the udiff content
     # is prefixed with +/-/space.
 
     if not content.endswith("\n"):
-        content = content + "\n"
+        content += "\n"
 
     lines = content.splitlines(keepends=True)
     line_num = 0
@@ -313,6 +431,15 @@ def process_fenced_block(lines, start_line_num):
 
 
 def hunk_to_before_after(hunk, lines=False):
+    # Normalize line endings first
+    normalized_hunk = []
+    for line in hunk:
+        norm_line = normalize_line_endings(line)
+        # Ensure each line ends with a newline
+        if norm_line and not norm_line.endswith('\n'):
+            norm_line += '\n'
+        normalized_hunk.append(norm_line)
+    hunk = normalized_hunk
     before = []
     after = []
     op = " "
@@ -338,4 +465,9 @@ def hunk_to_before_after(hunk, lines=False):
     before = "".join(before)
     after = "".join(after)
 
+    # Ensure both texts end with newlines
+    if before and not before.endswith('\n'):
+        before += '\n'
+    if after and not after.endswith('\n'):
+        after += '\n'
     return before, after

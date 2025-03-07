@@ -1,0 +1,58 @@
+```diff
+--- test_files/399-original.txt	2025-03-07 19:06:53
++++ test_files/399-modified.txt	2025-03-07 19:06:53
+@@ -5,15 +5,11 @@
+     composio login
+ """
+ 
+-import webbrowser
+-
+ import click
+ 
+-from composio.cli.context import Context, pass_context
++from composio.cli.context import Context, login, pass_context
++from composio.cli.utils.decorators import handle_exceptions
+ from composio.cli.utils.helpfulcmd import HelpfulCmdBase
+-from composio.client import Composio
+-from composio.exceptions import ComposioSDKError
+-from composio.utils.url import get_web_url
+ 
+ 
+ class Examples(HelpfulCmdBase, click.Command):
+@@ -33,6 +29,7 @@
+     help="Prevent from opening browser window",
+ )
+ @click.help_option("--help", "-h", "-help")
++@handle_exceptions()
+ @pass_context
+ def _login(
+     context: Context,
+@@ -47,22 +44,10 @@
+         )
+         return
+ 
+-    context.console.print("\n[green]> Authenticating...[/green]\n")
+-    try:
+-        key = Composio.generate_auth_key()
+-        url = get_web_url(path=f"?cliKey={key}")
++    if context.using_api_key_from_env():
+         context.console.print(
+-            "> Redirecting you to the login page. Please login using the following link:\n"
++            "[yellow]WARNING: `COMPOSIO_API_KEY` Environment variable is set[/yellow]"
+         )
+-        context.console.print(f"[green]{url}[/green]\n")
+-        if not no_browser:
+-            webbrowser.open(url)
+-        code = click.prompt("> Enter authentication code: ")
+-        context.user_data.api_key = Composio.validate_auth_session(
+-            key=key,
+-            code=code,
+-        )
+-        context.user_data.store()
+-        context.console.print("\n[green]✔ Authenticated successfully![/green]\n")
+-    except ComposioSDKError as e:
+-        raise click.ClickException(message=e.message) from e
++
++    context.console.print("\n> [green]Authenticating...[/green]")
++    login(context=context, no_browser=no_browser)
+```

@@ -1,0 +1,31 @@
+```diff
+--- test_files/219-original.txt	2025-03-07 19:06:34
++++ test_files/219-modified.txt	2025-03-07 19:06:34
+@@ -4,6 +4,10 @@
+ from pydantic import BaseModel, Field
+ 
+ from composio.tools.base.local import LocalAction
++from composio.tools.local.codeanalysis.actions.create_codemap import (
++    CreateCodeMap,
++    CreateCodeMapRequest,
++)
+ 
+ 
+ class GetRelevantCodeRequest(BaseModel):
+@@ -32,6 +36,7 @@
+     query: "database connection pooling"
+ 
+     The relevance of retrieved code snippets depends on the quality and specificity of the provided query.
++    Don't use this action if you are not sure about the query. And the results returned are not very relevant.
+     """
+ 
+     display_name = "Get Relevant Code"
+@@ -40,6 +45,7 @@
+     def execute(
+         self, request: GetRelevantCodeRequest, metadata: Dict
+     ) -> GetRelevantCodeResponse:
++        CreateCodeMap().execute(CreateCodeMapRequest(), metadata)
+         from composio.tools.local.codeanalysis import (  # pylint: disable=import-outside-toplevel
+             embedder,
+         )
+```

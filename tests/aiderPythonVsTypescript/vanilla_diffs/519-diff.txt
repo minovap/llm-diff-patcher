@@ -1,0 +1,13 @@
+```diff
+--- test_files/519-original.txt	2025-03-07 19:07:05
++++ test_files/519-modified.txt	2025-03-07 19:07:05
+@@ -1,7 +1,6 @@
+ ---
+ title: "AI Lead Generator Agent"
+ sidebarTitle: "AI Lead Generator"
+-icon: "user-plus"
+ description: "This project demonstrates how to use Composio to create a lead generation agent."
+ ---
+ 
+\ No newline at end of file
+```

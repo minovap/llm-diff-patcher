@@ -1,0 +1,50 @@
+```diff
+--- test_files/076-original.txt	2025-03-07 19:06:18
++++ test_files/076-modified.txt	2025-03-07 19:06:18
+@@ -1,23 +1,32 @@
+ """Test workspace abstractions."""
+ 
++import typing as t
+ from typing import Dict
+ from unittest import mock
+ 
+ import pytest
+ 
+-from composio.client.enums._action import Action
++from composio.client.enums import Action, ActionType, AppType, TagType
+ from composio.exceptions import ComposioSDKError
+ from composio.tools.env.base import (
++    RemoteWorkspace,
+     SessionFactory,
+     Sessionable,
+-    Workspace,
+     WorkspaceConfigType,
+ )
+ from composio.tools.env.id import generate_id
+ 
+ 
+-def test_workspace() -> None:
+-    class TestWorkspace(Workspace):
++def test_remote_workspace() -> None:
++    class TestRemoteWorkspace(RemoteWorkspace):
++        def check_for_missing_dependencies(
++            self,
++            apps: t.Optional[t.Sequence[AppType]] = None,
++            actions: t.Optional[t.Sequence[ActionType]] = None,
++            tags: t.Optional[t.Sequence[TagType]] = None,
++        ) -> None:
++            pass
++
+         def setup(self) -> None:
+             pass
+ 
+@@ -37,7 +46,7 @@
+         ComposioSDKError,
+         match="Please provide value for `COMPOSIO_API_KEY`",
+     ):
+-        _ = TestWorkspace(config=WorkspaceConfigType())
++        _ = TestRemoteWorkspace(config=WorkspaceConfigType())
+ 
+ 
+ def test_sessionable() -> None:
+```

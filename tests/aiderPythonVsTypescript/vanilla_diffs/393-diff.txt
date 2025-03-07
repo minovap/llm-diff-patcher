@@ -1,0 +1,11 @@
+```diff
+--- test_files/393-original.txt	2025-03-07 19:06:52
++++ test_files/393-modified.txt	2025-03-07 19:06:52
+@@ -1,6 +1,5 @@
+ """Serve the tooling server."""
+ 
+-
+ import click
+ from uvicorn import run
+ 
+```

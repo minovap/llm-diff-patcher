@@ -1,0 +1,54 @@
+```diff
+--- test_files/131-original.txt	2025-03-07 19:06:25
++++ test_files/131-modified.txt	2025-03-07 19:06:25
+@@ -16,13 +16,11 @@
+   <a href="https://pypi.org/project/composio-core/">
+   <img alt="Downloads" src="https://img.shields.io/pypi/dm/composio-core?label=Downloads&style=plastic&logo=github&color=blue&cacheSeconds=60">
+   </a>
+-  
++  <img alt="Downloads" src="https://codecov.io/gh/ComposioHQ/composio/graph/badge.svg?token=33H5QHUF7S">
+ </p>
+-
+ <h2 align="center"><i>
+   Production Ready Toolset for AI Agents
+-</i></h2>
+-
++</i></h2>  
+ <h4 align="center">Equip your agent with high-quality tools & integrations without worrying about authentication, accuracy, and reliability in a single line of code!
+ </h4>
+ <div align="center">
+@@ -69,6 +67,7 @@
+   - [Competitor Researcher](#competitor-researcher)
+   - [Todolist to Calendar](#todolist-to-calendar)
+   - [Github to Trello](#github-to-trello)
++- [Star History](#star-history)
+ - [📋 Read Our Code Of Conduct](#-read-our-code-of-conduct)
+ - [🤗 Contributions](#-contributions)
+ - [🔗 Links](#-links)
+@@ -86,7 +85,7 @@
+ 
+ - **100+ Tools**: Support for a range of different categories
+ 
+-  - **Softwares**: Do anything on GitHub, Notion, Linear, Gmail, Slack, Hubspot, Salesforce, & 90 more.
++  - **Software**: Do anything on GitHub, Notion, Linear, Gmail, Slack, Hubspot, Salesforce, & 90 more.
+   - **OS**: Click anywhere, Type anything, Copy to Clipboard, & more.
+   - **Browser**: Smart Search, Take a screenshot, MultiOn, Download, Upload, & more.
+   - **Search**: Google Search, Perplexity Search, Tavily, Exa & more.
+@@ -134,7 +133,7 @@
+ 
+ # Get GitHub tools that are pre-configured
+ actions = composio_tool_set.get_actions(
+-    actions=[Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER]
++    actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+ )
+ 
+ my_task = "Star a repo composiodev/composio on GitHub"
+@@ -210,6 +209,6 @@
+ 
+ ## 💪 Thanks To All Contributors
+ 
+-<a href="https://composio.dev/contributors?utm_source=github">
++<a href="https://github.com/composiohq/composio/graphs/contributors">
+   <img src="https://contributors-img.web.app/image?repo=composiodev/composio" alt="List of Contributors"/>
+ </a>
+```

@@ -1,0 +1,22 @@
+```diff
+--- test_files/024-original.txt	2025-03-07 19:06:14
++++ test_files/024-modified.txt	2025-03-07 19:06:14
+@@ -9,7 +9,7 @@
+ 
+ setup(
+     name="composio_google",
+-    version="0.5.25",
++    version="0.7.6",
+     author="Assistant",
+     author_email="karan@composio.dev",
+     description="Use Composio to get an array of tools with your Google AI Python Gemini model.",
+@@ -23,7 +23,7 @@
+     ],
+     python_requires=">=3.9,<4",
+     install_requires=[
+-        "composio_core==0.5.25",
++        "composio_core>=0.7.0,<0.8.0",
+         "google-cloud-aiplatform>=1.38.0",
+     ],
+     include_package_data=True,
+```

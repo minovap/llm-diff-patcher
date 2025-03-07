@@ -4,6 +4,7 @@
  */
 
 import { diff_match_patch } from 'diff-match-patch';
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Creates a unified diff of two text blocks, line by line.
@@ -14,6 +15,10 @@ import { diff_match_patch } from 'diff-match-patch';
  * @returns Array of diff lines, each prefixed with '+', '-', or ' '
  */
 export function diffLines(searchText: string, replaceText: string): string[] {
+  // Normalize line endings
+  searchText = normalizeLineEndings(searchText);
+  replaceText = normalizeLineEndings(replaceText);
+  
   const dmp = new diff_match_patch();
   dmp.Diff_Timeout = 5;
   // dmp.Diff_EditCost = 16; // Uncomment if needed for matching Python behavior

@@ -1,0 +1,38 @@
+```diff
+--- test_files/137-original.txt	2025-03-07 19:06:25
++++ test_files/137-modified.txt	2025-03-07 19:06:25
+@@ -1,10 +1,10 @@
+-from json import load
+ from composio_llamaindex import ComposioToolSet, App, Action
+ from llama_index.core.agent import FunctionCallingAgentWorker
+ from llama_index.core.llms import ChatMessage
+ from llama_index.core import Settings
+ from llama_index.llms.openai import OpenAI
+ from llama_index.llms.groq import Groq
++from llama_index.llms.cerebras import Cerebras
+ from dotenv import load_dotenv
+ from pathlib import Path
+ from datetime import datetime
+@@ -12,9 +12,10 @@
+ load_dotenv()
+ 
+ 
++llm = OpenAI(model="gpt-4o")
++#llm = Groq(model="llama-3.1-70b-versatile", stop_sequences=["\n\n"])
++#llm = Cerebras(model="llama3.1-70b")
+ 
+-llm = Groq(model="llama-3.1-70b-versatile", stop_sequences=["\n\n"])
+-
+ toolset = ComposioToolSet()
+ 
+ # Get the Gmail tools from the ComposioToolSet
+@@ -39,7 +40,7 @@
+ ]
+ 
+ agent = FunctionCallingAgentWorker(
+-    tools=gmail_tools,  # Tools available for the agent to use
++    tools=gmail_tools,  # Tools available for the agent to use # type: ignore
+     llm=llm,  # Language model for processing requests
+     prefix_messages=prefix_messages,  # Initial system messages for context
+     max_function_calls=10,  # Maximum number of function calls allowed
+```

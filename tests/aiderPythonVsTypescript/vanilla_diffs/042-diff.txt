@@ -1,0 +1,21 @@
+```diff
+--- test_files/042-original.txt	2025-03-07 19:06:15
++++ test_files/042-modified.txt	2025-03-07 19:06:15
+@@ -1,12 +1,14 @@
++from composio import Action, App, Tag, Trigger, WorkspaceType, action
++
+ from composio_griptape.toolset import ComposioToolSet
+ 
+-from composio.client.enums import Action, App, Tag, Trigger
+ 
+-
+ __all__ = (
+     "Action",
+     "App",
+     "Tag",
++    "WorkspaceType",
++    "action",
+     "Trigger",
+     "ComposioToolSet",
+ )
+```

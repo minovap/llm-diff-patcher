@@ -1,0 +1,23 @@
+```diff
+--- test_files/384-original.txt	2025-03-07 19:06:52
++++ test_files/384-modified.txt	2025-03-07 19:06:52
+@@ -7,7 +7,9 @@
+ 
+ import typing_extensions as te
+ 
++from composio.utils import help_msg
+ 
++
+ T = te.TypeVar("T")
+ P = te.ParamSpec("P")
+ 
+@@ -27,7 +29,7 @@
+         def new_func(*args: P.args, **kwargs: P.kwargs) -> T:
+             warnings.warn(
+                 f"`{func.__name__}` is deprecated and will be removed on v{version}. "
+-                f"Use `{replacement}` method instead.",
++                f"Use `{replacement}` method instead." + help_msg(),
+                 UserWarning,
+             )
+             return func(*args, **kwargs)
+```

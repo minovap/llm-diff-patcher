@@ -1,0 +1,21 @@
+```diff
+--- test_files/467-original.txt	2025-03-07 19:07:02
++++ test_files/467-modified.txt	2025-03-07 19:07:02
+@@ -1,4 +1,13 @@
+ // Helper function to stringify objects if needed
+-export const serializeValue = (obj: Record<string, unknown> | string | number | boolean | null | undefined) => {
+-    return typeof obj === 'object' ? JSON.stringify(obj) : obj;
+-}
++export const serializeValue = (
++  obj:
++    | Record<string, unknown>
++    | Array<Record<string, unknown>>
++    | string
++    | number
++    | boolean
++    | null
++    | undefined
++) => {
++  return typeof obj === "object" ? JSON.stringify(obj) : obj;
++};
+```

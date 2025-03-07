@@ -1,0 +1,38 @@
+```diff
+--- test_files/215-original.txt	2025-03-07 19:06:34
++++ test_files/215-modified.txt	2025-03-07 19:06:34
+@@ -1,10 +1,13 @@
+ import re
+ from typing import Dict, List, Tuple
+ 
+-from tree_sitter import Node, Parser, Tree
+-from tree_sitter_languages import get_parser
++import tree_sitter_python as tspython
++from tree_sitter import Language, Node, Parser, Tree
+ 
+ 
++PY_LANGUAGE = Language(tspython.language())
++
++
+ class SpanRelated:
+     """Class containing static methods for span-related operations"""
+ 
+@@ -125,7 +128,7 @@
+     Returns:
+         List[Dict]: A list of dictionaries containing node details.
+     """
+-    parser = get_parser("python")
++    parser = Parser(PY_LANGUAGE)
+     with open(file_path, "r", encoding="utf-8") as file:
+         test_code_str = file.read()
+ 
+@@ -262,7 +265,7 @@
+     if entity_type not in ["class", "function"]:
+         raise ValueError("Invalid entity_type. Must be 'class' or 'function'.")
+ 
+-    parser = get_parser("python")
++    parser = Parser(PY_LANGUAGE)
+     tree = fetch_tree(parser, entity_body)
+     entity_node = tree.root_node
+ 
+```

@@ -1,5 +1,13 @@
 import difflib
 
+from search_replace import normalize_line_endings
+
+def normalize_test_data(lines):
+    """Normalize line endings in test data"""
+    if isinstance(lines, list):
+        return [normalize_line_endings(line) for line in lines]
+    return normalize_line_endings(lines)
+
 from udiff_coder import normalize_hunk
 
 if __name__ == "__main__":
@@ -11,6 +19,8 @@ if __name__ == "__main__":
         "+This is a modified test file"
     ]
 
+    # Normalize line endings in the test hunk
+    test_hunk = normalize_test_data(test_hunk)
     result = normalize_hunk(test_hunk)
 
     print("Result of normalize_hunk:")

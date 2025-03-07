@@ -1,3 +1,4 @@
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Custom error class for when the search text is not unique in the content
@@ -10,31 +11,44 @@ export class SearchTextNotUnique extends Error {
 }
 
 /**
- * Simple text search and replace
+ * Simple text search and replace - this version correctly handles $ characters
+ * in string replacements by using a special replacement function.
  *
  * @param texts - Array containing [searchText, replaceText, originalText]
  * @returns The modified text or undefined if the search text doesn't exist
  */
 export function searchAndReplace(texts: string[]): string | undefined {
   const [searchText, replaceText, originalText] = texts;
+  
+  // Normalize line endings
+  const normalizedSearchText = normalizeLineEndings(searchText);
+  const normalizedOriginalText = normalizeLineEndings(originalText);
 
   if (!originalText.includes(searchText)) {
     return undefined;
   }
 
-  // This implementation doesn't check for uniqueness by default
-  // If needed, that check could be added here
-  return originalText.replace(searchText, replaceText);
+  // Special handling for $ in replacement string
+  // In JavaScript, $ has special meaning in replacement strings:
+  // $$ is escaped to $, $& is the matched substring,
+  // $` is the substring before the match, etc.
+  // 
+  // To fix the issue with $ being processed incorrectly, we use a function 
+  // for the second parameter of replace() instead of a string
+  return originalText.replace(searchText, () => {
+    // Return the replacement text directly, avoiding $ interpretation
+    return replaceText;
+  });
 }
 
 /**
  * Preprocessing configurations to be tried
  */
-export const allPreprocs = [
-  [false, false, false], // No preprocessing
-  [true, false, false],  // Strip blank lines
-  [false, true, false],  // Use relative indentation
-  [true, true, false],   // Both strip blank lines and use relative indentation
+export const allPreprocs: [boolean, boolean, boolean][] = [
+  [false, false, false] as [boolean, boolean, boolean], // No preprocessing
+  [true, false, false] as [boolean, boolean, boolean],  // Strip blank lines
+  [false, true, false] as [boolean, boolean, boolean],  // Use relative indentation
+  [true, true, false] as [boolean, boolean, boolean]    // Both strip blank lines and use relative indentation
 ];
 
 /**

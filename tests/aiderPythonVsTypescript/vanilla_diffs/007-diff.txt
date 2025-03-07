@@ -1,0 +1,20 @@
+```diff
+--- test_files/007-original.txt	2025-03-07 19:06:13
++++ test_files/007-modified.txt	2025-03-07 19:06:13
+@@ -1,11 +1,14 @@
+ from composio_llamaindex.toolset import ComposioToolSet  # pylint: disable=import-error
+ 
+-from composio.client.enums import Action, App, Tag
++from composio import Action, App, Tag, Trigger, WorkspaceType, action
+ 
+ 
+ __all__ = (
+     "Action",
+     "App",
+     "Tag",
++    "Trigger",
+     "ComposioToolSet",
++    "WorkspaceType",
++    "action",
+ )
+```

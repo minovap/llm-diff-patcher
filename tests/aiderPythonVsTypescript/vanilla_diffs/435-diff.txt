@@ -1,0 +1,12 @@
+```diff
+--- test_files/435-original.txt	2025-03-07 19:06:59
++++ test_files/435-modified.txt	2025-03-07 19:06:59
+@@ -1,5 +1,5 @@
+-import crypto from "crypto";
++import { v4 as uuidv4 } from "uuid";
+ 
+ export const getUUID = () => {
+-  return crypto.randomUUID();
++  return uuidv4();
+ };
+```

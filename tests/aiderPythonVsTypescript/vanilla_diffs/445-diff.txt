@@ -1,0 +1,13 @@
+```diff
+--- test_files/445-original.txt	2025-03-07 19:07:00
++++ test_files/445-modified.txt	2025-03-07 19:07:00
+@@ -1,6 +1,7 @@
++/* eslint-disable no-console */
++import chalk from "chalk";
+ import { Command } from "commander";
+ import client from "../sdk/client/client";
+-import chalk from "chalk";
+ import { getOpenAPIClient } from "../sdk/utils/config";
+ 
+ export default class ExecuteCommand {
+```

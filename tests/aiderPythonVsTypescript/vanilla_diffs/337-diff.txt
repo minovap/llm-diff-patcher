@@ -1,0 +1,64 @@
+```diff
+--- test_files/337-original.txt	2025-03-07 19:06:47
++++ test_files/337-modified.txt	2025-03-07 19:06:47
+@@ -1,11 +1,9 @@
+-from abc import ABC, abstractmethod
++from functools import wraps
++from typing import Callable, Dict, Optional, TypeVar
+ 
+ from pydantic import BaseModel, Field
+ 
+-from composio.tools.env.filemanager.manager import FileManager
+-from composio.tools.local.base import Action
+ 
+-
+ class BaseFileRequest(BaseModel):
+     file_manager_id: str = Field(
+         default="",
+@@ -15,8 +13,8 @@
+ 
+ 
+ class BaseFileResponse(BaseModel):
+-    error: str = Field(
+-        default="",
++    error: Optional[str] = Field(
++        default=None,
+         description="Error message if the action failed",
+     )
+     current_working_directory: str = Field(
+@@ -25,22 +23,18 @@
+     )
+ 
+ 
+-class BaseFileAction(Action, ABC):
+-    _tool_name: str = "filetool"
++T = TypeVar("T", bound=BaseFileRequest)
++R = TypeVar("R", bound=BaseFileResponse)
+ 
+-    @abstractmethod
+-    def execute_on_file_manager(
+-        self, file_manager: FileManager, request_data: BaseFileRequest
+-    ) -> BaseFileResponse:
+-        pass
+ 
+-    def execute(
+-        self, request_data: BaseFileRequest, authorisation_data: dict
+-    ) -> BaseFileResponse:
+-        file_managers = authorisation_data.get("workspace").file_managers  # type: ignore
+-        file_manager = file_managers.get(request_data.file_manager_id)
+-        resp = self.execute_on_file_manager(
+-            file_manager=file_manager, request_data=request_data
++# TOFIX: Override `Filetool.execute` and get rid of this decorator
++def include_cwd(func: Callable[[T, Dict], R]) -> Callable[[T, Dict], R]:
++    @wraps(func)
++    def wrapper(self, request: T, metadata: Dict) -> R:
++        response = func(self, request, metadata)  # type: ignore
++        response.current_working_directory = str(
++            self.filemanagers.get(request.file_manager_id).working_dir
+         )
+-        resp.current_working_directory = str(file_manager.working_dir)
+-        return resp
++        return response
++
++    return wrapper  # type: ignore
+```

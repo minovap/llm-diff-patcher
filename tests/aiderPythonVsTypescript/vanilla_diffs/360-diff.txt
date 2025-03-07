@@ -1,0 +1,12 @@
+```diff
+--- test_files/360-original.txt	2025-03-07 19:06:50
++++ test_files/360-modified.txt	2025-03-07 19:06:50
+@@ -1,4 +1,6 @@
+ """File manager for agents."""
+ 
+ from .file import File
+-from .manager import FileManager
++
++
++# from .manager import FileManager
+```

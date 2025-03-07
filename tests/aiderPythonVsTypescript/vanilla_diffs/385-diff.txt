@@ -1,0 +1,7 @@
+```diff
+--- test_files/385-original.txt	2025-03-07 19:06:52
++++ test_files/385-modified.txt	2025-03-07 19:06:52
+@@ -1 +1 @@
+-__version__ = "0.5.39"
++__version__ = "0.7.6"
+```

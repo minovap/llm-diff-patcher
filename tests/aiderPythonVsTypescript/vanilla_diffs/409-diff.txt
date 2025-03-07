@@ -1,0 +1,171 @@
+```diff
+--- test_files/409-original.txt	2025-03-07 19:06:54
++++ test_files/409-modified.txt	2025-03-07 19:06:54
+@@ -3,19 +3,21 @@
+ """
+ 
+ import typing as t
+-from pathlib import Path
+ 
+-import typing_extensions as te
++from pydantic import Field
+ 
+-from composio.constants import LOCAL_CACHE_DIRECTORY
+-from composio.exceptions import ComposioSDKError
++from composio.constants import (
++    COMPOSIO_VERSIONING_POLICY,
++    LOCAL_CACHE_DIRECTORY,
++    VERSION_LATEST,
++    VERSION_LATEST_BASE,
++)
+ from composio.storage.base import LocalStorage
+ 
+ 
+-_model_cache: t.Dict[str, LocalStorage] = {}
++_runtime_actions: t.Dict[str, "ActionData"] = {}
+ 
+ EntityType = t.TypeVar("EntityType", bound=LocalStorage)
+-ClassType = t.TypeVar("ClassType", bound=t.Type["_AnnotatedEnum"])
+ 
+ TAGS_CACHE = LOCAL_CACHE_DIRECTORY / "tags"
+ APPS_CACHE = LOCAL_CACHE_DIRECTORY / "apps"
+@@ -23,10 +25,12 @@
+ TRIGGERS_CACHE = LOCAL_CACHE_DIRECTORY / "triggers"
+ 
+ 
+-class MetadataFileNotFound(ComposioSDKError):
+-    """Raise when matadata file is missing."""
++class SentinalObject:
++    """Sentinel object."""
+ 
++    sentinel = None
+ 
++
+ class TagData(LocalStorage):
+     """Local storage for `Tag` object."""
+ 
+@@ -65,7 +69,27 @@
+     is_local: bool = False
+     "If set `True` the `app` is a local app."
+ 
++    is_runtime: bool = False
++    "Set `True` for actions registered at runtime."
+ 
++    shell: bool = False
++    "If set `True` the action will be executed using a shell."
++
++    replaced_by: t.Optional[str] = None
++    "If set, the action is deprecated and replaced by the given action."
++
++    version: str = COMPOSIO_VERSIONING_POLICY
++    "Specify what version to use when executing action."
++
++    available_version: t.List[str] = Field(
++        default_factory=lambda: [
++            VERSION_LATEST,
++            VERSION_LATEST_BASE,
++        ]
++    )
++    "Specify what version to use when executing action."
++
++
+ class TriggerData(LocalStorage):
+     """Local storage for `Trigger` object."""
+ 
+@@ -74,81 +98,26 @@
+ 
+     app: str
+     "Name of the app where this trigger belongs to."
+-    _cache: Path = TRIGGERS_CACHE
+ 
+ 
+-class _AnnotatedEnum(t.Generic[EntityType]):
+-    """Enum class that uses class annotations as values."""
++def add_runtime_action(name: str, data: ActionData) -> None:
++    """Add action at runtime."""
++    _runtime_actions[name] = data
+ 
+-    _slug: str
+-    _model: t.Type[EntityType]
+-    _path: Path
+ 
+-    def __new__(cls, value: t.Any):
+-        (base,) = t.cast(t.Tuple[t.Any], getattr(cls, "__orig_bases__"))
+-        (model,) = t.get_args(base)
+-        instance = super().__new__(cls)
+-        instance._model = model
+-        return instance
++# TODO: action_registry exists, how is _runtime_actions different from that?
++def get_runtime_actions() -> t.List:
++    """Add action at runtime."""
++    return list(_runtime_actions)
+ 
+-    def __init_subclass__(cls, path: Path) -> None:
+-        cls._path = path
+-        return super().__init_subclass__()
+ 
+-    def __init__(self, value: t.Union[str, te.Self]) -> None:
+-        """Create an Enum"""
+-        if isinstance(value, _AnnotatedEnum):
+-            value = value._slug
++DEPRECATED_MARKER = "<<DEPRECATED use "
+ 
+-        value = t.cast(str, value).upper()
+-        if value not in self.__annotations__:
+-            raise ValueError(f"Invalid value `{value}` for `{self.__class__.__name__}`")
+-        self._slug = value
+ 
+-    @property
+-    def slug(self) -> str:
+-        """Enum slug value."""
+-        return self._slug
++def replacement_action_name(description: str, app_name: str) -> t.Optional[str]:
++    """If the action is deprecated, get the replacement action name."""
++    if description is not None and DEPRECATED_MARKER in description:
++        _, newact = description.split(DEPRECATED_MARKER, maxsplit=1)
++        return (app_name + "_" + newact.replace(">>", "")).upper()
+ 
+-    def load(self) -> EntityType:
+-        """Load action data."""
+-        if self._slug is None:
+-            raise ValueError(
+-                "Cannot load `AppData` object without initializing object."
+-            )
+-        if not (self._path / self._slug).exists():
+-            raise MetadataFileNotFound(
+-                f"Metadata file for `{self._slug}` not found, "
+-                "Please run `composio apps update` to fix this"
+-            )
+-        if self._slug not in _model_cache:
+-            _model_cache[self._slug] = self._model.load(self._path / self._slug)
+-        return t.cast(EntityType, _model_cache[self._slug])
+-
+-    @classmethod
+-    def all(cls) -> t.Iterator[te.Self]:
+-        """Iterate over available object."""
+-        for name in cls.__annotations__:
+-            yield cls._create(name=name)
+-
+-    @classmethod
+-    def _create(cls, name: str) -> te.Self:
+-        """Create a `_AnnotatedEnum` class."""
+-        return cls(name)
+-
+-    def __str__(self) -> str:
+-        """String representation."""
+-        return t.cast(str, self._slug)
+-
+-    def __eq__(self, other: object) -> bool:
+-        """Check equivilance of two objects."""
+-        if not isinstance(other, (str, _AnnotatedEnum)):
+-            return NotImplemented
+-        return str(self) == str(other)
+-
+-
+-def enum(cls: ClassType) -> ClassType:
+-    """Decorate class."""
+-    for attr in cls.__annotations__:
+-        setattr(cls, attr, cls(attr))
+-    return cls
++    return None
+```

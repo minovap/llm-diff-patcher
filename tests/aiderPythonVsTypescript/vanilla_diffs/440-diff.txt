@@ -1,0 +1,114 @@
+```diff
+--- test_files/440-original.txt	2025-03-07 19:07:00
++++ test_files/440-modified.txt	2025-03-07 19:07:00
+@@ -1,14 +1,12 @@
++/* eslint-disable no-console */
+ import chalk from "chalk";
+ import { Command } from "commander";
+ import inquirer from "inquirer";
+ import open from "open";
+ 
+-import {
+-  getClientBaseConfig,
+-  getAPISDK,
+-  setCliConfig,
+-} from "../sdk/utils/config";
+ import client from "../sdk/client/client";
++import { setCliConfig } from "../sdk/utils/cli";
++import { getOpenAPIClient, getSDKConfig } from "../sdk/utils/config";
+ import { FRONTEND_BASE_URL } from "./src/constants";
+ 
+ export default class LoginCommand {
+@@ -20,36 +18,39 @@
+       .command("login")
+       .option(
+         "-n, --no-browser",
+-        "No browser will be opened, you will have to manually copy the link and paste it in your browser",
++        "No browser will be opened, you will have to manually copy the link and paste it in your browser"
+       )
+-      .description("Login to Composio")
++      .description("Authenticate and login to Composio")
+       .action(this.handleAction.bind(this));
+   }
+ 
+   private async handleAction(options: { browser: boolean }): Promise<void> {
+-    getAPISDK();
+-    const { apiKey, baseURL } = getClientBaseConfig();
++    getOpenAPIClient();
++    const { apiKey, baseURL } = getSDKConfig();
+ 
+     if (apiKey) {
+       console.log(
+         chalk.yellow(
+-          "✨ You are already authenticated and ready to use Composio! ✨\n",
+-        ),
++          "✨ You are already authenticated and ready to use Composio! ✨\n"
++        )
+       );
+       return;
+     }
++    try {
++      const { data } = await client.cli.generateCliSession({
++        query: {},
++      });
+ 
+-    const { data, error } = await client.cli.handleCliCodeExchange({});
+-    if (!!error) {
+-      console.log(chalk.red((error as any).message));
++      const cliKey = data?.key as string;
++      const loginUrl = `${FRONTEND_BASE_URL}?cliKey=${cliKey}`;
++
++      this.displayLoginInstructions(loginUrl, options.browser);
++      const authCode = await this.promptForAuthCode();
++      await this.verifyAndSetupCli(cliKey, authCode, baseURL);
++    } catch (error) {
++      console.log(chalk.red((error as Error).message));
+       return;
+     }
+-    const cliKey = data?.key as string;
+-    const loginUrl = `${FRONTEND_BASE_URL}?cliKey=${cliKey}`;
+-
+-    this.displayLoginInstructions(loginUrl, options.browser);
+-    const authCode = await this.promptForAuthCode();
+-    await this.verifyAndSetupCli(cliKey, authCode, baseURL);
+   }
+ 
+   private displayLoginInstructions(url: string, openBrowser: boolean): void {
+@@ -61,7 +62,8 @@
+   }
+ 
+   private async promptForAuthCode(): Promise<string> {
+-    const { authCode } = await inquirer.prompt({
++    const prompt = inquirer.createPromptModule();
++    const { authCode } = await prompt({
+       type: "input",
+       name: "authCode",
+       message: "Enter authentication code:",
+@@ -72,22 +74,22 @@
+   private async verifyAndSetupCli(
+     cliKey: string,
+     authCode: string,
+-    baseURL: string,
++    _baseURL: string
+   ): Promise<void> {
+-    const { data, error } = await client.cli.handleCliCodeVerification({
++    const { data, error } = await client.cli.verifyCliCode({
+       query: { key: cliKey, code: authCode },
+       throwOnError: false,
+     });
+ 
+     if (error) {
+-      throw new Error((error as any).message);
++      throw new Error((error as Error).message);
+     }
+ 
+     const apiKeyFromServer = data?.apiKey;
+     setCliConfig(apiKeyFromServer as string, "");
+ 
+     console.log(
+-      chalk.yellow("✨ You are authenticated and ready to use Composio! ✨\n"),
++      chalk.yellow("✨ You are authenticated and ready to use Composio! ✨\n")
+     );
+   }
+ }
+```

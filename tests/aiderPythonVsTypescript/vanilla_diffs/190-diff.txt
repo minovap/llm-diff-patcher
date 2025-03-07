@@ -1,0 +1,13 @@
+```diff
+--- test_files/190-original.txt	2025-03-07 19:06:31
++++ test_files/190-modified.txt	2025-03-07 19:06:31
+@@ -27,7 +27,7 @@
+ def should_continue(state: MessagesState) -> Literal["tools", "__end__"]:
+     messages = state["messages"]
+     last_message = messages[-1]
+-    if last_message.tool_calls:
++    if last_message.tool_calls: # type: ignore
+         return "tools"
+     return "__end__"
+ 
+```

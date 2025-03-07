@@ -1,0 +1,13 @@
+```diff
+--- test_files/265-original.txt	2025-03-07 19:06:39
++++ test_files/265-modified.txt	2025-03-07 19:06:39
+@@ -23,7 +23,7 @@
+         alias="admin",
+         description="Admin",
+     )
+-    custom_role_id: int = Field(
++    custom_role_id: t.Optional[int] = Field(
+         default=None,
+         alias="custom_role_id",
+         description="Custom Role Id",
+```

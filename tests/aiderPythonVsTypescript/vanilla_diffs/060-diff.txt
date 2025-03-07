@@ -1,0 +1,35 @@
+```diff
+--- test_files/060-original.txt	2025-03-07 19:06:16
++++ test_files/060-modified.txt	2025-03-07 19:06:16
+@@ -2,6 +2,7 @@
+ 
+ import dotenv
+ from autogen import AssistantAgent, UserProxyAgent
++
+ from composio_autogen import App, ComposioToolSet
+ 
+ 
+@@ -15,7 +16,7 @@
+     system_message="Reply TERMINATE when the task is done or when user's content is empty",
+     llm_config={
+         "config_list": [
+-            {"model": "gpt-4", "api_key": os.environ["OPENAI_API_KEY"]},
++            {"model": "gpt-4-turbo", "api_key": os.environ["OPENAI_API_KEY"]},
+         ]
+     },
+ )
+@@ -38,11 +39,11 @@
+ 
+     # Register the preferred Applications, with right executor.
+     composio_toolset.register_tools(
+-        tools=[App.GITHUB], caller=chatbot, executor=user_proxy
++        apps=[App.GITHUB], caller=chatbot, executor=user_proxy
+     )
+ 
+     # Define task.
+-    task = "Star a repo ComposioHQ/composio on GitHub"
++    task = "Star a repo composiohq/composio on GitHub"
+ 
+     # Execute task.
+     response = user_proxy.initiate_chat(chatbot, message=task)
+```

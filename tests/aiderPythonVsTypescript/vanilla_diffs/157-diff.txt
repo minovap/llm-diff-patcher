@@ -1,0 +1,88 @@
+```diff
+--- test_files/157-original.txt	2025-03-07 19:06:27
++++ test_files/157-modified.txt	2025-03-07 19:06:27
+@@ -3,20 +3,23 @@
+ import re
+ from dotenv import load_dotenv
+ from autogen.agentchat import AssistantAgent, UserProxyAgent
+-from composio_autogen import Action, App, ComposioToolSet
++from composio_autogen import Action, App, ComposioToolSet, Trigger
+ from composio.client.collections import TriggerEventData
+ from datetime import datetime
+-
++from typing import Optional, Any
+ load_dotenv()
+ 
++DATE_TIME: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
++TIMEZONE: Optional[Any] = datetime.now().astimezone().tzinfo
++
+ # Configuration for the language model
+ llm_config = {
+     "config_list": [{"model": "gpt-4o", "api_key": os.environ["OPENAI_API_KEY"]}]
+ }
+ 
+-scheduler_assistant_prompt = """
++scheduler_assistant_prompt = f"""
+ You are an AI assistant specialized in creating calendar events based on email information. 
+-Current DateTime: {date_time}. All the conversations happen in IST timezone.
++Current DateTime: {DATE_TIME} and timezone is {TIMEZONE}. All the conversations happen in IST timezone.
+ Pass empty config ("config": {{}}) for the function calls, if you get an error about not passing config.
+ Analyze email, and create event on calendar depending on the email content. 
+ You should also draft an email in response to the sender of the previous email    
+\ No newline at end of file
+@@ -35,25 +38,11 @@
+     human_input_mode="NEVER",
+     code_execution_config={"use_docker": False},
+ )
+-def extract_sender_email(payload):
+-    delivered_to_header_found = False
+-    for header in payload["headers"]:
+-        if header.get("name", "") == "Delivered-To" and header.get("value", "") != "":
+-            delivered_to_header_found = True
+-    print("delivered_to_header_found: ", delivered_to_header_found)
+-    if not delivered_to_header_found:
+-        return None
+-    for header in payload["headers"]:
+-        if header["name"] == "From":
+-            # Regular expression to extract email from the 'From' header value
+-            match = re.search(r"[\w\.-]+@[\w\.-]+", header["value"])
+-            if match:
+-                return match.group(0)
+-    return None
+-
+ # Creating a ComposioToolSet instance for handling actions
+ composio_toolset = ComposioToolSet()
+-schedule_tool = composio_toolset.register_actions(
++schedule_tool = composio_toolset.register_tools(
++    caller=chatbot,
++    executor=user_proxy,
+     actions=[
+         Action.GOOGLECALENDAR_FIND_FREE_SLOTS,
+         Action.GOOGLECALENDAR_CREATE_EVENT,
+\ No newline at end of file
+@@ -67,13 +56,13 @@
+ listener = composio_toolset.create_trigger_listener()
+ 
+ 
+-@listener.callback(filters={"trigger_name": "gmail_new_gmail_message"})
++@listener.callback(filters={"trigger_name": Trigger.GMAIL_NEW_GMAIL_MESSAGE})
+ def callback_new_message(event: TriggerEventData) -> None:
+     print("here in the function")
+     payload = event.payload
+     thread_id = payload.get("threadId")
+-    message = payload.get("snippet")
+-    sender_mail = extract_sender_email(payload["payload"])
++    message = payload.get("messageText")
++    sender_mail = payload.get("sender")
+     if sender_mail is None:
+         print("No sender email found")
+         return
+\ No newline at end of file
+@@ -98,4 +87,4 @@
+ 
+ 
+ print("Subscription created!")
+-listener.listen()
++listener.wait_forever()
+\ No newline at end of file
+```

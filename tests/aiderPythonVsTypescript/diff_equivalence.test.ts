@@ -58,6 +58,7 @@ describe('Python vs TypeScript diff implementation equivalence', () => {
   const getResultContent = (testNum: string, category: string): {
     pyContent: string,
     tsContent: string,
+    modifiedContent: string,
     shellScriptResult: string
   } => {
     const shellScriptResult = runComparisonTest(testNum, category);
@@ -66,10 +67,12 @@ describe('Python vs TypeScript diff implementation equivalence', () => {
     const paddedNum = testNum.padStart(3, '0');
     const tsResultPath = path.join(categoryPath, `${paddedNum}-result-ts.txt`);
     const pyResultPath = path.join(categoryPath, `${paddedNum}-result-py.txt`);
+    const modifiedPath = path.join(categoryPath, `${paddedNum}-modified.txt`);
 
     // Read contents or provide fallback message if files don't exist
     let tsContent = `[tsContent was not generated in ${tsResultPath}]`;
     let pyContent = `[pyContent was not generated in ${pyResultPath}]`;
+    let modifiedContent = '[modifiedContent could not be read from file]';
 
     if (fs.existsSync(tsResultPath)) {
       tsContent = fs.readFileSync(tsResultPath, 'utf8');
@@ -79,26 +82,30 @@ describe('Python vs TypeScript diff implementation equivalence', () => {
       pyContent = fs.readFileSync(pyResultPath, 'utf8');
     }
 
-    return { pyContent, tsContent, shellScriptResult };
-  };
+    if (fs.existsSync(modifiedPath)) {
+      modifiedContent = fs.readFileSync(modifiedPath, 'utf8');
+    }
 
-  // Generate tests for vanilla diffs
-  describe('Vanilla diffs', () => {
-    categories.vanilla.tests.forEach(testNum => {
-      const paddedNum = testNum.padStart(3, '0');
-      test(`Test ${paddedNum}: Vanilla diff test`, () => {
-        const { pyContent, tsContent, shellScriptResult } = getResultContent(testNum, 'vanilla');
-        expect(pyContent).toEqual(tsContent);
-      });
-    });
-  });
+    return { pyContent, tsContent, modifiedContent, shellScriptResult };
+  };
 
   // Generate tests for exotic diffs
   describe('Exotic diffs', () => {
     categories.exotic.tests.forEach(testNum => {
       const paddedNum = testNum.padStart(3, '0');
       test(`Test ${paddedNum}: Exotic diff test`, () => {
-        const { pyContent, tsContent, shellScriptResult } = getResultContent(testNum, 'exotic');
+        const { pyContent, tsContent, modifiedContent, shellScriptResult } = getResultContent(testNum, 'exotic');
+        expect(pyContent).toEqual(tsContent);
+      });
+    });
+  });
+
+  // Generate tests for vanilla diffs
+  describe('Vanilla diffs', () => {
+    categories.vanilla.tests.forEach(testNum => {
+      const paddedNum = testNum.padStart(3, '0');
+      test(`Test ${paddedNum}: Vanilla diff test`, () => {
+        const { pyContent, tsContent, modifiedContent, shellScriptResult } = getResultContent(testNum, 'vanilla');
         expect(pyContent).toEqual(tsContent);
       });
     });

@@ -1,0 +1,34 @@
+```diff
+--- test_files/418-original.txt	2025-03-07 19:06:54
++++ test_files/418-modified.txt	2025-03-07 19:06:54
+@@ -5,10 +5,26 @@
+     testTimeout: 6000000,
+     collectCoverage: true,
+     coverageReporters: [
+-        "html"
++        "html",
++        "text",
+     ],
+     reporters: [
+         "default",
+-        "jest-html-reporters"
++        ["jest-html-reporters", {
++            "pageTitle": "Composio SDK Coverage Report",
++            "publicPath": "./html-report",
++            "filename": "report.html",
++            "includeConsoleLog": true,
++            "includeTestCoverage": true,
++            "includeTime": true,
++            "showSummary": true,
++            "showTable": true,
++        }]
+     ],
++    "coveragePathIgnorePatterns": [
++        "src/sdk/client/*",
++        "src/env/*",
++        "src/sdk/testUtils/*",
++        "config/*",
++    ]
+ };
+\ No newline at end of file
+```

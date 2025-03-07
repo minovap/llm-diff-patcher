@@ -1,0 +1,7 @@
+```diff
+--- test_files/324-original.txt	2025-03-07 19:06:46
++++ test_files/324-modified.txt	2025-03-07 19:06:46
+@@ -1 +1 @@
+-from .tool import RagTool
++from .tool import Ragtool
+```

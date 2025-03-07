@@ -1,0 +1,60 @@
+```diff
+--- test_files/485-original.txt	2025-03-07 19:07:03
++++ test_files/485-modified.txt	2025-03-07 19:07:03
+@@ -1,31 +1,32 @@
+-import { describe, it, expect, beforeAll } from "@jest/globals";
++import { beforeAll, describe, expect, it } from "@jest/globals";
+ import { getBackendClient } from "../testUtils/getBackendClient";
+ import { ActiveTriggers } from "./activeTriggers";
+ 
+-describe("Apps class tests", () => {
+-    let backendClient;
+-    let activeTriggers: ActiveTriggers;
+-  
+-    beforeAll(() => {
+-        backendClient = getBackendClient();
+-        activeTriggers = new ActiveTriggers(backendClient);
++describe("Active Triggers class tests", () => {
++  let backendClient;
++  let activeTriggers: ActiveTriggers;
+ 
+-    });
++  beforeAll(() => {
++    backendClient = getBackendClient();
++    activeTriggers = new ActiveTriggers(backendClient);
++  });
+ 
+-    it("should get a specific action", async () => {
+-        const activeTriggersList = await activeTriggers.list();
+-        expect(activeTriggersList).toBeInstanceOf(Array);
+-        expect(activeTriggersList).not.toHaveLength(0);
+-    });
++  it("should retrieve a list of active triggers", async () => {
++    const activeTriggersList = await activeTriggers.list();
++    expect(activeTriggersList).toBeInstanceOf(Array);
++    expect(activeTriggersList).not.toHaveLength(0);
++  });
+ 
+-    it("should get a list of actions", async () => {
+-        const activeTriggersList = await activeTriggers.list();
+-        const firstTrigger= activeTriggersList[0];
+-        const activeTrigger = await activeTriggers.get({ path:{
+-                triggerId: firstTrigger.id
+-            }
+-        });
+-        expect(activeTrigger).toBeDefined();
+-    });
++  it("should retrieve details of a specific active trigger", async () => {
++    const activeTriggersList = await activeTriggers.list();
++    const firstTrigger = activeTriggersList[0];
+ 
++    if (!firstTrigger.id) {
++      throw new Error("Trigger ID is required");
++    }
++    const activeTrigger = await activeTriggers.get({
++      triggerId: firstTrigger.id as string,
++    });
++    expect(activeTrigger).toBeDefined();
++  });
+ });
+```

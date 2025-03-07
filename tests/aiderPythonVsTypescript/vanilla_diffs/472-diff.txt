@@ -1,0 +1,15 @@
+```diff
+--- test_files/472-original.txt	2025-03-07 19:07:02
++++ test_files/472-modified.txt	2025-03-07 19:07:02
+@@ -1,5 +1,5 @@
+ export enum TELEMETRY_EVENTS {
+-    SDK_INITIALIZED = "SDK_INITIALIZED",
+-    SDK_METHOD_INVOKED = "SDK_METHOD_INVOKED",
+-    CLI_INVOKED = "CLI_INVOKED"
+-}
+\ No newline at end of file
++  SDK_INITIALIZED = "SDK_INITIALIZED",
++  SDK_METHOD_INVOKED = "SDK_METHOD_INVOKED",
++  CLI_INVOKED = "CLI_INVOKED",
++}
+```

@@ -1,0 +1,186 @@
+```diff
+--- test_files/008-original.txt	2025-03-07 19:06:13
++++ test_files/008-modified.txt	2025-03-07 19:06:13
+@@ -1,16 +1,25 @@
+ import types
+ import typing as t
++import warnings
+ from inspect import Signature
+ 
+-from composio_langchain import ComposioToolSet as BaseComposioToolSet
+-from llama_index.core.tools import FunctionTool  # pylint: disable=import-error
++import typing_extensions as te
++from llama_index.core.tools import FunctionTool
+ 
+-from composio.client.enums import Action, App, Tag
+-from composio.constants import DEFAULT_ENTITY_ID
++from composio import Action, ActionType, AppType
++from composio import ComposioToolSet as BaseComposioToolSet
++from composio import TagType
++from composio.tools.toolset import ProcessorsType
++from composio.utils import help_msg
+ from composio.utils.shared import get_pydantic_signature_format_from_schema_params
+ 
+ 
+-class ComposioToolSet(BaseComposioToolSet):
++class ComposioToolSet(
++    BaseComposioToolSet,
++    runtime="llamaindex",
++    description_char_limit=1024,
++    action_name_char_limit=64,
++):
+     """
+     Composio toolset for LlamaIndex framework.
+ 
+@@ -41,7 +50,7 @@
+         tools = composio_toolset.get_tools(apps=[App.GITHUB])
+ 
+         # Define task
+-        task = "Star a repo SamparkAI/docs on GitHub"
++        task = "Star a repo composiohq/composio on GitHub"
+ 
+         # Define agent
+         agent = create_openai_functions_agent(openai_client, tools, prompt)
+@@ -52,38 +61,20 @@
+     ```
+     """
+ 
+-    def __init__(
++    def _wrap_action(
+         self,
+-        api_key: t.Optional[str] = None,
+-        base_url: t.Optional[str] = None,
+-        entity_id: str = DEFAULT_ENTITY_ID,
+-    ) -> None:
+-        """
+-        Initialize composio toolset.
+-
+-        :param api_key: Composio API key
+-        :param base_url: Base URL for the Composio API server
+-        :param entity_id: Entity ID for making function calls
+-        """
+-        super().__init__(
+-            api_key=api_key,
+-            base_url=base_url,
+-            entity_id=entity_id,
+-        )
+-        self._runtime = "llamaindex"
+-
+-    def prepare_python_function(
+-        self, app, action, description, schema_params, entity_id
++        action: str,
++        description: str,
++        schema_params: t.Dict,
++        entity_id: t.Optional[str] = None,
+     ):
+         def function(**kwargs: t.Any) -> t.Dict:
+             """Wrapper function for composio action."""
+             return self.execute_action(
+-                action=Action.from_app_and_action(
+-                    app=app,
+-                    name=action,
+-                ),
++                action=Action(value=action),
+                 params=kwargs,
+                 entity_id=entity_id or self.entity_id,
++                _check_requested_actions=True,
+             )
+ 
+         action_func = types.FunctionType(
+@@ -97,7 +88,6 @@
+                 schema_params=schema_params
+             )
+         )
+-
+         action_func.__doc__ = description
+ 
+         return action_func
+@@ -108,13 +98,11 @@
+         entity_id: t.Optional[str] = None,
+     ) -> FunctionTool:
+         """Wraps composio tool as LlamaIndex FunctionTool object."""
+-        app = schema["appName"]
+         action = schema["name"]
+-        description = schema["description"]
++        description = schema.get("description", schema["name"])
+         schema_params = schema["parameters"]
+ 
+-        action_func = self.prepare_python_function(
+-            app=app,
++        action_func = self._wrap_action(
+             action=action,
+             description=description,
+             schema_params=schema_params,
+@@ -126,34 +114,62 @@
+             description=description,
+         )
+ 
+-    # pylint: disable=useless-super-delegation
++    @te.deprecated("Use `ComposioToolSet.get_tools` instead.\n", category=None)
+     def get_actions(
+         self,
+-        actions: t.Sequence[Action],
++        actions: t.Sequence[ActionType],
+         entity_id: t.Optional[str] = None,
+     ) -> t.Sequence[FunctionTool]:
+         """
+         Get composio tools wrapped as LlamaIndex FunctionTool objects.
+ 
+         :param actions: List of actions to wrap
+-        :param entity_id: Entity ID to use for executing function calls.
++        :param entity_id: Entity ID for the function wrapper
++
+         :return: Composio tools wrapped as `StructuredTool` objects
+         """
+-        return super().get_actions(actions, entity_id)
++        warnings.warn(
++            "Use `ComposioToolSet.get_tools` instead.\n" + help_msg(),
++            DeprecationWarning,
++            stacklevel=2,
++        )
++        return self.get_tools(actions=actions, entity_id=entity_id)
+ 
+-    # pylint: disable=useless-super-delegation
+     def get_tools(
+         self,
+-        apps: t.Sequence[App],
+-        tags: t.Optional[t.List[t.Union[str, Tag]]] = None,
++        actions: t.Optional[t.Sequence[ActionType]] = None,
++        apps: t.Optional[t.Sequence[AppType]] = None,
++        tags: t.Optional[t.List[TagType]] = None,
+         entity_id: t.Optional[str] = None,
++        *,
++        processors: t.Optional[ProcessorsType] = None,
++        check_connected_accounts: bool = True,
+     ) -> t.Sequence[FunctionTool]:
+         """
+         Get composio tools wrapped as LlamaIndex FunctionTool objects.
+ 
++        :param actions: List of actions to wrap
+         :param apps: List of apps to wrap
+         :param tags: Filter the apps by given tags
+-        :param entity_id: Entity ID to use for executing function calls.
++        :param entity_id: Entity ID for the function wrapper
++
+         :return: Composio tools wrapped as `StructuredTool` objects
+         """
+-        return super().get_tools(apps, tags, entity_id)
++        self.validate_tools(apps=apps, actions=actions, tags=tags)
++        if processors is not None:
++            self._processor_helpers.merge_processors(processors)
++        return [
++            self._wrap_tool(
++                schema=tool.model_dump(
++                    exclude_none=True,
++                ),
++                entity_id=entity_id or self.entity_id,
++            )
++            for tool in self.get_action_schemas(
++                actions=actions,
++                apps=apps,
++                tags=tags,
++                check_connected_accounts=check_connected_accounts,
++                _populate_requested=True,
++            )
++        ]
+```

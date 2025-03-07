@@ -10,18 +10,21 @@ def run_test(test_number, category_path=None):
     # Format test number with leading zeros
     test_num = test_number.zfill(3)
     
-    # Define file paths
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    original_file_path = os.path.join(current_dir, f"{test_num}-original.txt")
-    diff_file_path = os.path.join(current_dir, f"{test_num}-diff.txt")
-    
-    # Determine where to save the result
+    # If category path not provided, use current directory
     if category_path:
-        # Save to category folder
+        category_dir = category_path
+    else:
+        category_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # Define file paths - all files in the category directory
+    original_file_path = os.path.join(category_dir, f"{test_num}-original.txt")
+    diff_file_path = os.path.join(category_dir, f"{test_num}-diff.txt")
+    
+    # Always save results to the category folder
+    if category_path:
         result_file_path = os.path.join(category_path, f"{test_num}-result-py.txt")
     else:
-        # Save to script directory
-        result_file_path = os.path.join(current_dir, f"{test_num}-result-py.txt")
+        result_file_path = os.path.join(category_dir, f"{test_num}-result-py.txt")
     
     # Log where we're saving the result
     print(f"Will save result to: {result_file_path}")

@@ -1,0 +1,7 @@
+```diff
+--- test_files/297-original.txt	2025-03-07 19:06:44
++++ test_files/297-modified.txt	2025-03-07 19:06:44
+@@ -1 +1 @@
+-from .tool import HistoryFetcherTool
++from .tool import HistoryFetcher
+```

@@ -1,6 +1,6 @@
 import { allPreprocs, SearchTextNotUnique, flexibleSearchAndReplace, searchAndReplace } from './search_replace';
 import unidiff from "unidiff";
-
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Simple implementation of flexibleSearchAndReplace that only uses the basic search and replace
@@ -9,6 +9,9 @@ import unidiff from "unidiff";
  * @returns The modified text or undefined if unsuccessful
  */
 export function flexiJustSearchAndReplace(texts: string[]): string | undefined {
+  // Normalize line endings in all input texts
+  texts = texts.map(normalizeLineEndings);
+  
   const strategies: [(texts: string[]) => string | undefined, [boolean, boolean, boolean][]][] = [
     [searchAndReplace, allPreprocs],
   ];
@@ -24,8 +27,11 @@ export function flexiJustSearchAndReplace(texts: string[]): string | undefined {
  * @returns The modified content or undefined if the hunk couldn't be applied
  */
 export function directlyApplyHunk(content: string, hunk: string[]): string | undefined {
+  // Normalize line endings
+  content = normalizeLineEndings(content);
+  hunk = hunk.map(normalizeLineEndings);
+  
   const [before, after] = hunkToBeforeAfter(hunk) as [string, string];
-
   if (!before) {
     return undefined;
   }
@@ -39,7 +45,7 @@ export function directlyApplyHunk(content: string, hunk: string[]): string | und
   }
 
   try {
-    const result =  flexiJustSearchAndReplace([before, after, content]);
+    const result = flexiJustSearchAndReplace([before, after, content]);
     return result;
   } catch (error) {
     if (error instanceof SearchTextNotUnique) {
@@ -47,6 +53,17 @@ export function directlyApplyHunk(content: string, hunk: string[]): string | und
     }
     throw error;
   }
+}
+
+/**
+ * Helper function to escape $ characters in a string for use in replacements
+ * 
+ * @param str - The string to process
+ * @returns A string with $ characters preserved
+ */
+function preserveDollarSigns(str: string): string {
+  // No special handling needed for joining strings, as the issue is with replacement operations
+  return str;
 }
 
 /**
@@ -60,6 +77,9 @@ export function hunkToBeforeAfter(
   hunk: string[],
   returnLines: boolean = false
 ): [string[] | string, string[] | string] {
+  // Normalize line endings in the hunk
+  hunk = hunk.map(normalizeLineEndings);
+  
   const before: string[] = [];
   const after: string[] = [];
   let op = " ";
@@ -89,12 +109,12 @@ export function hunkToBeforeAfter(
     return [before, after];
   }
 
+  // When joining the strings, we need to ensure $ characters are treated as literals
   const beforeText = before.join("");
   const afterText = after.join("");
 
   return [beforeText, afterText];
 }
-
 
 /**
  * Cleans up whitespace-only lines, preserving only necessary whitespace
@@ -121,6 +141,9 @@ function cleanupPureWhitespaceLines(lines: string[]): string[] {
  * @returns Normalized diff hunk as an array of lines
  */
 export function normalizeHunk(hunk: string[]): string[] {
+  // Normalize line endings
+  hunk = hunk.map(normalizeLineEndings);
+  
   const [before, after] = hunkToBeforeAfter(hunk, true) as [string[], string[]];
 
   const cleanedBefore = cleanupPureWhitespaceLines(before);
@@ -157,6 +180,9 @@ export function processFencedBlock(
   lines: string[],
   startLineNum: number
 ): [number, Array<[string | null, string[]]>] {
+  // Normalize line endings
+  lines = lines.map(normalizeLineEndings);
+  
   let lineNum: number;
 
   // Find the end of the fenced block
@@ -241,6 +267,9 @@ export function processFencedBlock(
  * @returns Array of edits, where each edit is a tuple of [path, hunk]
  */
 export function findDiffs(content: string): Array<[string | null, string[]]> {
+  // Normalize line endings
+  content = normalizeLineEndings(content);
+  
   // Ensure content ends with newline
   if (!content.endsWith("\n")) {
     content = content + "\n";
@@ -262,9 +291,6 @@ export function findDiffs(content: string): Array<[string | null, string[]]> {
       lineNum += 1;
     }
   }
-
-  // For now, just take 1!
-  // return edits.slice(0, 1);
 
   return edits;
 }

@@ -1,0 +1,11 @@
+```diff
+--- test_files/120-original.txt	2025-03-07 19:06:23
++++ test_files/120-modified.txt	2025-03-07 19:06:23
+@@ -61,5 +61,5 @@
+         dry_run=False,
+         test_range=test_range,
+         test_instance_ids=test_instance_ids_list,
+-        image_name="composio/composio:dev",
++        image_name="composio/composio:latest",
+     )
+```

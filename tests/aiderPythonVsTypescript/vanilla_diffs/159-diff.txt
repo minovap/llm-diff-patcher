@@ -1,0 +1,37 @@
+```diff
+--- test_files/159-original.txt	2025-03-07 19:06:28
++++ test_files/159-modified.txt	2025-03-07 19:06:28
+@@ -8,6 +8,8 @@
+ from composio_crewai import ComposioToolSet, App  # type: ignore
+ from crewai import Agent, Crew, Process, Task
+ from langchain_openai import ChatOpenAI
++#from langchain_groq import ChatGroq
++#from langchain_cerebras import ChatCerebras
+ 
+ # Import embedtool from composio.tools.local
+ from composio.tools.local import embedtool
+@@ -19,19 +21,20 @@
+ 
+ # Initialize a ChatOpenAI instance with GPT-4o model
+ llm = ChatOpenAI(model="gpt-4o")
+-
++#llm = ChatGroq(model="mixtral-8x7b-32768")
++#llm = ChatCerebras(model="llama3.1-70b")
+ # Initialize a ComposioToolSet with the API key from environment variables
+ composio_toolset = ComposioToolSet()
+ 
+ # Retrieve tools from Composio, specifically the EMBEDTOOL app
+-tools = composio_toolset.get_tools(apps=[App.EMBEDTOOL])
++tools = composio_toolset.get_tools(apps=[App.EMBED_TOOL])
+ 
+ # Define an image search agent
+ image_search_agent = Agent(
+     role="Image Search Agent",
+     goal=("Search and retrieve images based on specific queries."),
+     verbose=True,  # Enable verbose output
+-    memory=True,  # Enable memory for the agent
++    memory=True,  # Enable memory for the agent # type: ignore
+     backstory=(
+         "You are an image search expert, skilled in finding and retrieving relevant images from the web. "
+         "Your keen eye for detail ensures that the images you find are accurate and high quality."
+```

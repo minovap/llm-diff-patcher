@@ -1,0 +1,13 @@
+```diff
+--- test_files/136-original.txt	2025-03-07 19:06:25
++++ test_files/136-modified.txt	2025-03-07 19:06:25
+@@ -8,8 +8,6 @@
+ from composio_autogen import Action, App, ComposioToolSet
+ from datetime import datetime
+ 
+-from python.composio.cli import apps
+-
+ # Load environment variables from a .env file
+ dotenv.load_dotenv()
+ 
+```

@@ -1,0 +1,27 @@
+```diff
+--- test_files/011-original.txt	2025-03-07 19:06:13
++++ test_files/011-modified.txt	2025-03-07 19:06:13
+@@ -8,10 +8,10 @@
+ 
+ 
+ composio_toolset = ComposioToolSet()
+-tools = composio_toolset.get_actions(
++tools = composio_toolset.get_tools(
+     actions=[
+-        Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER,
+-        Action.GITHUB_USERS_GET_AUTHENTICATED,
++        Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER,
++        Action.GITHUB_GET_THE_AUTHENTICATED_USER,
+     ]
+ )
+ tool_node = ToolNode(tools)
+@@ -52,7 +52,7 @@
+         "messages": [
+             (
+                 "human",
+-                # "Star the Github Repository sawradip/sawradip",
++                # "Star the Github Repository composiohq/composio",
+                 "Get my information.",
+             )
+         ]
+```

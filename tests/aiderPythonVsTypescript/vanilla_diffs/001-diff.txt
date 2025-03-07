@@ -1,15 +1,21 @@
 ```diff
- function calculateSum(a, b) {
-   // Add two numbers and return result
-   return a + b;
- }
- 
-+function calculateMultiply(a, b) {
-+  // Multiply two numbers and return result
-+  return a * b;
-+}
+--- test_files/001-original.txt	2025-03-07 19:06:12
++++ test_files/001-modified.txt	2025-03-07 19:06:12
+@@ -1,12 +1,14 @@
++from composio import Action, App, Tag, Trigger, WorkspaceType, action
 +
- function displayResult(result) {
-   console.log("The result is: " + result);
- }
+ from composio_lyzr.toolset import ComposioToolSet
+ 
+-from composio.client.enums import Action, App, Tag, Trigger
+ 
+-
+ __all__ = (
+     "Tag",
+     "App",
+     "Action",
+     "ComposioToolSet",
++    "WorkspaceType",
++    "action",
+     "Trigger",
+ )
 ```

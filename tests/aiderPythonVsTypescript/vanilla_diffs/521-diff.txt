@@ -1,0 +1,59 @@
+```diff
+--- test_files/521-original.txt	2025-03-07 19:07:06
++++ test_files/521-modified.txt	2025-03-07 19:07:06
+@@ -1,7 +1,6 @@
+ ---
+ title: "AI Outreach Agent"
+ sidebarTitle: "AI Outreach Agent"
+-icon: "envelope"
+ description: "This project demonstrates how to use Composio to create an outreach agent."
+ ---
+ 
+@@ -42,8 +41,8 @@
+ 
+ <Step title="Initializing the Tools and the LLM">
+ ```python initialize toolset and llm
+-toolset = ComposioToolSet(api_key="")
+-tools = toolset.get_tools(apps=[App.HUBSPOT, App.GMAIL])
++toolset = ComposioToolSet(api_key="YOUR-API-KEY")
++tools = toolset.get_tools(actions=[Action.HUBSPOT_LIST_CONTACTS_PAGE, Action.GMAIL_CREATE_EMAIL_DRAFT])
+ 
+ llm = OpenAI(model="gpt-4o")
+ ```
+@@ -92,7 +91,7 @@
+ 
+ load_dotenv()
+ toolset = ComposioToolSet(api_key="")
+-tools = toolset.get_tools(apps=[App.PEOPLEDATALABS, App.GOOGLESHEETS])
++tools = toolset.get_tools(actions=[Action.HUBSPOT_LIST_CONTACTS_PAGE, Action.GMAIL_CREATE_EMAIL_DRAFT])
+ 
+ llm = OpenAI(model="gpt-4o")
+ 
+@@ -161,7 +160,7 @@
+   apiKey: process.env.COMPOSIO_API_KEY,
+ });
+ 
+-const tools = await toolset.getTools([App.HUBSPOT, App.GMAIL]);
++const tools = await toolset.getTools({actions: ["HUBSPOT_LIST_CONTACTS_PAGE", "GMAIL_CREATE_EMAIL_DRAFT"]});
+ 
+ const llm = new ChatOpenAI({
+     model: "gpt-4-turbo",
+@@ -221,9 +220,7 @@
+     apiKey: process.env.COMPOSIO_API_KEY,
+ });
+ 
+-const tools = await toolset.getTools({
+-    actions: ["HUBSPOT_LIST_CONTACTS_PAGE", "GMAIL_CREATE_EMAIL_DRAFT"]
+-});
++const tools = await toolset.getTools({actions: ["HUBSPOT_LIST_CONTACTS_PAGE", "GMAIL_CREATE_EMAIL_DRAFT"]});
+ 
+ const prompt = await pull("hwchase17/openai-functions-agent");
+ 
+@@ -255,4 +252,4 @@
+ </Step>
+ </Steps>
+ </Tab>
+-</Tabs>
+\ No newline at end of file
++</Tabs>
+```

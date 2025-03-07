@@ -1,0 +1,55 @@
+```diff
+--- test_files/155-original.txt	2025-03-07 19:06:27
++++ test_files/155-modified.txt	2025-03-07 19:06:27
+@@ -11,19 +11,21 @@
+ 
+ from composio.client.collections import TriggerEventData
+ 
++load_dotenv()
++
+ llm = ChatOpenAI(model="gpt-4-turbo")
+ # llm = ChatGroq(model='llama3-70b-8192', api_key=os.environ['GROQ_API_KEY'])
+ 
+ composio_toolset = ComposioToolSet()
+ 
+-schedule_tool = composio_toolset.get_actions(
++schedule_tool = composio_toolset.get_tools(
+     actions=[
+         Action.GOOGLECALENDAR_FIND_FREE_SLOTS,
+         Action.GOOGLECALENDAR_CREATE_EVENT,
+         Action.GMAIL_CREATE_EMAIL_DRAFT,
+     ]
+ )
+-email_tool = composio_toolset.get_actions(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
++email_tool = composio_toolset.get_tools(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
+ date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+ timezone = datetime.now().astimezone().tzinfo
+ 
+@@ -56,8 +58,8 @@
+     print("here in the function")
+     payload = event.payload
+     thread_id = payload.get("threadId")
+-    message = payload.get("snippet")
+-    sender_mail = extract_sender_email(payload["payload"])
++    message = payload.get("messageText")
++    sender_mail = payload.get("sender")
+     if sender_mail is None:
+         print("No sender email found")
+         return
+@@ -74,7 +76,8 @@
+             action to create the event at a free slot and send the invite to {sender_mail}.
+             If an event was created, draft a confirmation email for the created event. 
+             The receiver of the mail is: {sender_mail}, the subject should be meeting scheduled and body
+-            should describe what the meeting is about
++            should describe what the meeting is about.
++            The date is {date_time} and timezone is {timezone}
+             """
+     # Execute the agent
+     res = agent_executor.invoke({"input": query_task})
+@@ -82,4 +85,4 @@
+ 
+ 
+ print("Subscription created!")
+-listener.listen()
++listener.wait_forever()
+```

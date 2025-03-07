@@ -1,0 +1,17 @@
+```diff
+--- test_files/098-original.txt	2025-03-07 19:06:20
++++ test_files/098-modified.txt	2025-03-07 19:06:20
+@@ -12,11 +12,11 @@
+     KEY_INSTANCE_ID,
+     KEY_MODEL,
+     MAP_VERSION_TO_INSTALL,
+-    PatchType,
+     TESTS_ERROR,
+     TESTS_FAILED,
+     TESTS_PASSED,
+     TESTS_TIMEOUT,
++    PatchType,
+ )
+ 
+ 
+```

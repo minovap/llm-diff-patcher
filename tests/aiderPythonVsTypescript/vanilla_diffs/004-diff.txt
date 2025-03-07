@@ -1,0 +1,29 @@
+```diff
+--- test_files/004-original.txt	2025-03-07 19:06:12
++++ test_files/004-modified.txt	2025-03-07 19:06:12
+@@ -9,13 +9,13 @@
+ 
+ setup(
+     name="composio_lyzr",
+-    version="0.3.12",
++    version="0.7.6",
+     author="Sawradip",
+     author_email="sawradip@composio.dev",
+     description="Use Composio to get an array of tools with your Lyzr workflow.",
+     long_description=(Path(__file__).parent / "README.md").read_text(encoding="utf-8"),
+     long_description_content_type="text/markdown",
+-    url="https://github.com/SamparkAI/composio_sdk",
++    url="https://github.com/ComposioHQ/composio",
+     classifiers=[
+         "Programming Language :: Python :: 3",
+         "License :: OSI Approved :: Apache Software License",
+@@ -25,7 +25,7 @@
+     install_requires=[
+         "lyzr-automata>=0.1.3",
+         "pydantic>=2.6.4",
+-        "composio_core===0.3.12",
++        "composio_core>=0.7.0,<0.8.0",
+         "langchain>=0.1.0",
+     ],
+     include_package_data=True,
+```

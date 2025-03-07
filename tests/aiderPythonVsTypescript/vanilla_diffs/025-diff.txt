@@ -1,0 +1,12 @@
+```diff
+--- test_files/025-original.txt	2025-03-07 19:06:14
++++ test_files/025-modified.txt	2025-03-07 19:06:14
+@@ -1,6 +1,7 @@
+ """
+ Google AI Python Gemini demo.
+ """
++
+ import dotenv
+ from composio_google import App, ComposioToolset
+ from vertexai.generative_models import GenerativeModel
+```

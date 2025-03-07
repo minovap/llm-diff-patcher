@@ -1,0 +1,87 @@
+```diff
+--- test_files/538-original.txt	2025-03-07 19:07:07
++++ test_files/538-modified.txt	2025-03-07 19:07:07
+@@ -1,10 +1,15 @@
+ ---
+ title: "Integrations"
+ sidebarTitle: "Integrations"
+-icon: "plug"
+ description: "Allow your users to connect with any Apps."
+ ---
+ 
++# OpenAPI Specification
++
++Make sure to have `info` section in your OpenAPI Specification. In the info section, you should have the following fields:
++- `title`: Name of the tool
++- `version`: Version of the tool/spec
++
+ # Integration YAML Configuration
+ 
+ This README provides an overview of the `integration.yaml` file structure used for configuring app integrations, with a focus on custom fields.
+\ No newline at end of file
+@@ -27,7 +32,7 @@
+ 
+ 2. **Authentication Schemes**
+    - `auth_schemes`: List of authentication methods supported
+-     - `scheme_name`: Name of the auth scheme
++     - `name`: Name of the auth scheme
+      - `auth_mode`: Authentication mode (Supported modes: OAUTH2, BASIC, API_KEY, OAUTH1)
+      - For OAuth2:
+        - `authorization_url`: OAuth authorization URL
+\ No newline at end of file
+@@ -43,7 +48,12 @@
+        - `default_scopes`: Default OAuth scopes
+        - `scope_separator`: Character used to separate scopes
+      - For API Key:
+-       
++       ```yaml
++       proxy:
++         base_url: "{{base_url}}"
++         headers:
++           Authorization: "{{api_key}}"
++       ```
+      - For Basic Auth:
+        `username` and `password` fields are required. You can use them in the proxy/header section directly like:
+        ```yaml
+\ No newline at end of file
+@@ -61,7 +71,7 @@
+ 
+    Common attributes for custom fields include:
+    - `name`: Unique identifier for the field
+-   - `displayName`: Human-readable name for the field
++   - `display_name`: Human-readable name for the field
+    - `description`: Detailed explanation of the field's purpose
+    - `type`: Data type of the field (e.g., string, boolean)
+    - `required`: Whether the field is mandatory
+\ No newline at end of file
+@@ -74,7 +84,7 @@
+    ```yaml
+    fields:
+      - name: api_key
+-       displayName: API Key
++       display_name: API Key
+        description: "Your API key for authentication."
+        type: string
+        required: true
+\ No newline at end of file
+@@ -85,7 +95,7 @@
+    ```yaml
+    fields:
+      - name: instanceUrl
+-       displayName: Instance URL
++       display_name: Instance URL
+        description: "The base URL for your instance, used for API requests."
+        type: string
+        required: true
+\ No newline at end of file
+@@ -96,7 +106,7 @@
+    ```yaml
+    fields:
+      - name: subdomain
+-       displayName: Sub Domain
++       display_name: Sub Domain
+        description: "Your PostHog subdomain (e.g., 'app' for app.posthog.com)."
+        type: string
+        required: true
+\ No newline at end of file
+```

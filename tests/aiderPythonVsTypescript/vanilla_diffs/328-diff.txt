@@ -1,0 +1,10 @@
+```diff
+--- test_files/328-original.txt	2025-03-07 19:06:47
++++ test_files/328-modified.txt	2025-03-07 19:06:47
+@@ -2,4 +2,4 @@
+ File manager.
+ """
+ 
+-from .tool import FileTool
++from .tool import Filetool
+```

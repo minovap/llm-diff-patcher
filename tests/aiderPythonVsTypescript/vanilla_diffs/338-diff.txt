@@ -1,0 +1,69 @@
+```diff
+--- test_files/338-original.txt	2025-03-07 19:06:47
++++ test_files/338-modified.txt	2025-03-07 19:06:47
+@@ -1,10 +1,12 @@
++from typing import Dict
++
+ from pydantic import Field
+ 
+-from composio.tools.env.filemanager.manager import FileManager
++from composio.tools.base.local import LocalAction
+ from composio.tools.local.filetool.actions.base_action import (
+-    BaseFileAction,
+     BaseFileRequest,
+     BaseFileResponse,
++    include_cwd,
+ )
+ 
+ 
+@@ -12,7 +14,9 @@
+     """Request to change the current working directory."""
+ 
+     path: str = Field(
+-        ..., description="The path to change the current working directory to"
++        ...,
++        description="The path to change the current working directory to. "
++        "Can be absolute, relative to the current working directory, or use '..' to navigate up the directory tree.",
+     )
+ 
+ 
+@@ -20,25 +24,21 @@
+     """Response to change the current working directory."""
+ 
+ 
+-class ChangeWorkingDirectory(BaseFileAction):
++class ChangeWorkingDirectory(LocalAction[ChwdirRequest, ChwdirResponse]):
+     """
+-    Changes the current working directory of the file manager to the specified path.
+-    The commands after this action will be executed in this new directory.
++    Changes the current working directory of the file manager to the specified
++    path. The commands after this action will be executed in this new directory.
++
+     Can result in:
+     - PermissionError: If the user doesn't have permission to access the directory.
+     - FileNotFoundError: If the directory or any parent directory does not exist.
+     - RuntimeError: If the path cannot be resolved due to a loop or other issues.
+     """
+ 
+-    _display_name = "Change Working Directory"
+-    _request_schema = ChwdirRequest
+-    _response_schema = ChwdirResponse
+-
+-    def execute_on_file_manager(
+-        self, file_manager: FileManager, request_data: ChwdirRequest  # type: ignore
+-    ) -> ChwdirResponse:
++    @include_cwd  # type: ignore
++    def execute(self, request: ChwdirRequest, metadata: Dict) -> ChwdirResponse:
+         try:
+-            file_manager.chdir(request_data.path)
++            self.filemanagers.get(request.file_manager_id).chdir(request.path)
+             return ChwdirResponse()
+         except PermissionError as e:
+             return ChwdirResponse(error=f"Permission denied: {str(e)}")
+@@ -46,3 +46,5 @@
+             return ChwdirResponse(error=f"Directory not found: {str(e)}")
+         except RuntimeError as e:
+             return ChwdirResponse(error=f"Unable to resolve path: {str(e)}")
++        except OSError as e:
++            return ChwdirResponse(error=f"Unable to resolve path: {str(e)}")
+```

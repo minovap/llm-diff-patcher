@@ -1,0 +1,134 @@
+```diff
+--- test_files/473-original.txt	2025-03-07 19:07:02
++++ test_files/473-modified.txt	2025-03-07 19:07:02
+@@ -1,64 +1,77 @@
+-import { TELEMETRY_URL } from "../constants";
+-import { sendProcessReq, sendBrowserReq } from "../../../utils/external";
+-import ComposioSDKContext from "../composioContext";
+-import { BatchProcessor } from "../base/batchProcessor";
++import { sendBrowserReq, sendProcessReq } from "../../../utils/external";
+ import { getEnvVariable } from "../../../utils/shared";
++import { BatchProcessor } from "../base/batchProcessor";
++import ComposioSDKContext from "../composioContext";
++import { TELEMETRY_URL } from "../constants";
+ 
+ export class TELEMETRY_LOGGER {
+-    private static batchProcessor = new BatchProcessor(1000, 100, async (data) => {
+-        await TELEMETRY_LOGGER.sendTelemetry(data as Record<string, unknown>[]);
+-    });
++  private static batchProcessor = new BatchProcessor(100, 10, async (data) => {
++    await TELEMETRY_LOGGER.sendTelemetry(data as Record<string, unknown>[]);
++  });
+ 
+-    private static createTelemetryWrapper(method: Function, className: string) {
+-        return async (...args: unknown[]) => {
+-            const payload = {
+-                eventName: method.name,
+-                data: { className, args },
+-                sdk_meta: ComposioSDKContext
+-            };
+-            
+-            TELEMETRY_LOGGER.batchProcessor.pushItem(payload);
+-            return method(...args);
+-        };
+-    }
++  private static createTelemetryWrapper(method: Function, className: string) {
++    return async (...args: unknown[]) => {
++      const payload = {
++        eventName: method.name,
++        data: { className, args },
++        sdk_meta: {
++          apiKey: ComposioSDKContext.apiKey,
++          baseURL: ComposioSDKContext.baseURL,
++          composioVersion: ComposioSDKContext.composioVersion,
++          frameworkRuntime: ComposioSDKContext.frameworkRuntime,
++          source: ComposioSDKContext.source,
++          sessionId: ComposioSDKContext.sessionId,
++          isBrowser: typeof window !== "undefined",
++        },
++      };
+ 
+-    private static async sendTelemetry(payload: Record<string, unknown>[]) {
+-        const isTelementryDisabled = getEnvVariable("TELEMETRY_DISABLED", "false") === "true";
+-        if(isTelementryDisabled) {
+-            return;
+-        }
+-        const url = `${TELEMETRY_URL}/api/sdk_metrics/telemetry`;
+-        const reqPayload = {
+-            data: { events: payload },
+-            url,
+-            method: "POST",
+-            headers: { "Content-Type": "application/json" }
+-        };
++      TELEMETRY_LOGGER.batchProcessor.pushItem(payload);
++      return method(...args);
++    };
++  }
+ 
+-        const isBrowser = typeof window !== "undefined";
+-        if (isBrowser) {
+-            await sendBrowserReq(reqPayload);
+-        } else {
+-            await sendProcessReq(reqPayload);
+-        }
+-    }
++  private static async sendTelemetry(payload: Record<string, unknown>[]) {
++    const isTelemetryDisabled =
++      getEnvVariable("TELEMETRY_DISABLED", "false") === "true";
+ 
+-    static wrapClassMethodsForTelemetry(classInstance: any, methods: string[]) {
+-        methods.forEach((method) => {
+-            classInstance[method] = TELEMETRY_LOGGER.createTelemetryWrapper(classInstance[method], classInstance.constructor.name);
+-        });
++    if (isTelemetryDisabled) {
++      return;
+     }
+ 
+-    static manualTelemetry(eventName: string, data: Record<string, unknown>) {
+-        const payload = {
+-            eventName,
+-            data,
+-            sdk_meta: ComposioSDKContext
+-        };
+-        TELEMETRY_LOGGER.batchProcessor.pushItem(payload);
+-    }
++    const url = `${TELEMETRY_URL}/api/sdk_metrics/telemetry`;
+ 
+-    static wrapFunctionForTelemetry(func: Function, className: string) {
+-        return TELEMETRY_LOGGER.createTelemetryWrapper(func, className);
++    const reqPayload = {
++      data: payload,
++      url,
++      method: "POST",
++      headers: { "Content-Type": "application/json" },
++    };
++
++    const isBrowser = typeof window !== "undefined";
++    if (isBrowser) {
++      await sendBrowserReq(reqPayload);
++    } else {
++      await sendProcessReq(reqPayload);
+     }
++  }
++
++  static manualTelemetry(eventName: string, data: Record<string, unknown>) {
++    const payload = {
++      eventName,
++      data,
++      sdk_meta: {
++        apiKey: ComposioSDKContext.apiKey,
++        baseURL: ComposioSDKContext.baseURL,
++        composioVersion: ComposioSDKContext.composioVersion,
++        frameworkRuntime: ComposioSDKContext.frameworkRuntime,
++        source: ComposioSDKContext.source,
++        isBrowser: typeof window !== "undefined",
++      },
++    };
++    TELEMETRY_LOGGER.batchProcessor.pushItem(payload);
++  }
++
++  static wrapFunctionForTelemetry(func: Function, className: string) {
++    return TELEMETRY_LOGGER.createTelemetryWrapper(func, className);
++  }
+ }
+```

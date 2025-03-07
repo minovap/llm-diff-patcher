@@ -1,0 +1,13 @@
+```diff
+--- test_files/052-original.txt	2025-03-07 19:06:16
++++ test_files/052-modified.txt	2025-03-07 19:06:16
+@@ -9,7 +9,7 @@
+ 
+ setup(
+     name="composio_agno",
+-    version="0.7.1",
++    version="0.7.6",
+     author="Devanshu",
+     author_email="tech@composio.dev",
+     description="Use Composio to get an array of tools with your Agno Plugin.",
+```

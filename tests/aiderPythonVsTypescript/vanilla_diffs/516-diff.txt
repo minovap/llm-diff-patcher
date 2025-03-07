@@ -1,0 +1,221 @@
+```diff
+--- test_files/516-original.txt	2025-03-07 19:07:05
++++ test_files/516-modified.txt	2025-03-07 19:07:05
+@@ -1,82 +1,68 @@
+-import { ComposioToolSet as BaseComposioToolSet } from "../sdk/base.toolset";
++// Import core dependencies
+ import {
+   AiTextGenerationOutput,
+   AiTextGenerationToolInput,
+-  // @ts-ignore
+ } from "@cloudflare/workers-types";
+-import { GetListActionsResponse } from "../sdk/client";
++import { z } from "zod";
++import { ComposioToolSet as BaseComposioToolSet } from "../sdk/base.toolset";
++import { COMPOSIO_BASE_URL } from "../sdk/client/core/OpenAPI";
++import { TELEMETRY_LOGGER } from "../sdk/utils/telemetry";
++import { TELEMETRY_EVENTS } from "../sdk/utils/telemetry/events";
++import { ZToolSchemaFilter } from "../types/base_toolset";
++import { Optional, Sequence } from "../types/util";
+ 
+-type Optional<T> = T | null;
+-type Sequence<T> = Array<T>;
+-
++/**
++ * CloudflareToolSet provides integration with Cloudflare Workers AI
++ * for executing AI tool calls and handling responses
++ */
+ export class CloudflareToolSet extends BaseComposioToolSet {
++  // Class constants
++  static FRAMEWORK_NAME = "cloudflare";
++  static DEFAULT_ENTITY_ID = "default";
++  fileName: string = "js/src/frameworks/cloudflare.ts";
++
+   /**
+-   * Composio toolset for Cloudflare framework.
++   * Initialize a new CloudflareToolSet instance
+    *
+-   * Example:
+-   * ```typescript
+-   *
+-   * ```
++   * @param config Configuration options including API key, base URL, entity ID and workspace config
+    */
+-  constructor(config: {
+-    apiKey?: Optional<string>;
+-    baseUrl?: Optional<string>;
+-    entityId?: string;
+-  }) {
+-    super(
+-      config.apiKey || null,
+-      config.baseUrl || null,
+-      "cloudflare",
+-      config.entityId || "default"
+-    );
++  constructor(
++    config: {
++      apiKey?: Optional<string>;
++      baseUrl?: Optional<string>;
++      entityId?: string;
++      connectedAccountIds?: Record<string, string>;
++      allowTracing?: boolean;
++    } = {}
++  ) {
++    super({
++      apiKey: config.apiKey || null,
++      baseUrl: config.baseUrl || COMPOSIO_BASE_URL,
++      runtime: null,
++      entityId: config.entityId || CloudflareToolSet.DEFAULT_ENTITY_ID,
++      connectedAccountIds: config.connectedAccountIds,
++      allowTracing: config.allowTracing || false,
++    });
+   }
+ 
+-  async get_actions(filters: {
+-    actions: Sequence<string>;
+-  }): Promise<Sequence<AiTextGenerationToolInput>> {
++  /**
++   * Retrieve available tools based on provided filters
++   *
++   * @param filters Optional filters for actions, apps, tags and use cases
++   * @returns Promise resolving to array of AI text generation tools
++   */
++  async getTools(
++    filters: z.infer<typeof ZToolSchemaFilter>
++  ): Promise<Sequence<AiTextGenerationToolInput>> {
++    TELEMETRY_LOGGER.manualTelemetry(TELEMETRY_EVENTS.SDK_METHOD_INVOKED, {
++      method: "getTools",
++      file: this.fileName,
++      params: filters,
++    });
++    const actions = await this.getToolsSchema(filters);
+     return (
+-      (await this.client.actions.list({})).items
+-        ?.filter((a) => {
+-          return filters.actions.includes(a!.name!);
+-        })
+-        .map((action) => {
+-          const formattedSchema: AiTextGenerationToolInput["function"] = {
+-            name: action.name!,
+-            description: action.description!,
+-            parameters: action.parameters as unknown as {
+-              type: "object";
+-              properties: {
+-                [key: string]: {
+-                  type: string;
+-                  description?: string;
+-                };
+-              };
+-              required: string[];
+-            },
+-          };
+-          const tool: AiTextGenerationToolInput = {
+-            type: "function",
+-            function: formattedSchema,
+-          };
+-          return tool;
+-        }) || []
+-    );
+-  }
+-
+-  async get_tools(filters: {
+-    apps: Sequence<string>;
+-    tags: Optional<Array<string>>;
+-    useCase: Optional<string>;
+-  }): Promise<Sequence<AiTextGenerationToolInput>> {
+-    return (
+-      (
+-        await this.client.actions.list({
+-          apps: filters.apps.join(","),
+-          tags: filters.tags?.join(","),
+-          filterImportantActions: !filters.tags && !filters.useCase,
+-          useCase: filters.useCase || undefined,
+-        })
+-      ).items?.map((action) => {
++      actions.map((action) => {
++        // Format the action schema for Cloudflare Workers AI
+         const formattedSchema: AiTextGenerationToolInput["function"] = {
+           name: action.name!,
+           description: action.description!,
+@@ -100,36 +86,66 @@
+     );
+   }
+ 
+-  async execute_tool_call(
++  /**
++   * Execute a single tool call
++   *
++   * @param tool The tool to execute with name and arguments
++   * @param entityId Optional entity ID to execute the tool for
++   * @returns Promise resolving to stringified tool execution result
++   */
++  async executeToolCall(
+     tool: {
+       name: string;
+       arguments: unknown;
+     },
+     entityId: Optional<string> = null
+   ): Promise<string> {
+-    console.log(tool);
++    TELEMETRY_LOGGER.manualTelemetry(TELEMETRY_EVENTS.SDK_METHOD_INVOKED, {
++      method: "executeToolCall",
++      file: this.fileName,
++      params: { tool, entityId },
++    });
++
++    const toolSchema = await this.getToolsSchema({
++      actions: [tool.name],
++    });
++    const appName = toolSchema[0]?.appName?.toLowerCase();
++    const connectedAccountId = appName && this.connectedAccountIds?.[appName];
++
+     return JSON.stringify(
+-      await this.execute_action(
+-        tool.name,
+-        typeof tool.arguments === "string" ? JSON.parse(tool.arguments) : tool.arguments,
+-        entityId || this.entityId
+-      )
++      await this.executeAction({
++        action: tool.name,
++        params:
++          typeof tool.arguments === "string"
++            ? JSON.parse(tool.arguments)
++            : tool.arguments,
++        entityId: entityId || this.entityId,
++        connectedAccountId: connectedAccountId,
++      })
+     );
+   }
+ 
+-  async handle_tool_call(
++  /**
++   * Handle tool calls from AI text generation output
++   *
++   * @param result The AI text generation output containing tool calls
++   * @param entityId Optional entity ID to execute the tools for
++   * @returns Promise resolving to array of tool execution results
++   */
++  async handleToolCall(
+     result: AiTextGenerationOutput,
+     entityId: Optional<string> = null
+   ): Promise<Sequence<string>> {
++    TELEMETRY_LOGGER.manualTelemetry(TELEMETRY_EVENTS.SDK_METHOD_INVOKED, {
++      method: "handleToolCall",
++      file: this.fileName,
++      params: { result, entityId },
++    });
+     const outputs = [];
+-    if (result instanceof ReadableStream) {
+-      console.log("");
+-    } else if (!result) {
+-      console.log("");
+-    } else if ("tool_calls" in result && Array.isArray(result.tool_calls)) {
++    if ("tool_calls" in result && Array.isArray(result.tool_calls)) {
+       for (const tool_call of result.tool_calls) {
+         if (tool_call.name) {
+-          outputs.push(await this.execute_tool_call(tool_call, entityId));
++          outputs.push(await this.executeToolCall(tool_call, entityId));
+         }
+       }
+     }
+```

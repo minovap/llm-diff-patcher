@@ -1,0 +1,21 @@
+```diff
+--- test_files/223-original.txt	2025-03-07 19:06:35
++++ test_files/223-modified.txt	2025-03-07 19:06:35
+@@ -15,11 +15,13 @@
+     """Code index tool."""
+ 
+     requires = [
+-        "tree_sitter==0.21.3",
+-        "deeplake",
++        "tree_sitter>=0.22.0",
++        "deeplake>3.9,<3.9.39",
+         "sentence-transformers",
+-        "tree_sitter_languages",
++        "tree_sitter_python>=0.22.0",
++        "tokenizers>=0.19,<0.20",
+         "git+https://github.com/DataDog/jedi.git@92d0c807b0dcd115b1ffd0a4ed21e44db127c2fb#egg=jedi",
++        "PyJWT",  # deeplake/client/client.py:41
+     ]
+ 
+     logo = "https://raw.githubusercontent.com/ComposioHQ/composio/master/python/docs/imgs/logos/codemap.png"
+```

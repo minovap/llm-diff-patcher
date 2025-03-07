@@ -1,0 +1,17 @@
+```diff
+--- test_files/455-original.txt	2025-03-07 19:07:01
++++ test_files/455-modified.txt	2025-03-07 19:07:01
+@@ -42,6 +42,12 @@
+     appName: z.string().optional(),
+     text: z.string().optional(),
+     authConfig: ZCustomAuthParams.optional(),
++    allowTracing: z.boolean().optional(),
++    sessionInfo: z
++      .object({
++        sessionId: z.string().optional(),
++      })
++      .optional(),
+   }),
+ });
+ 
+```

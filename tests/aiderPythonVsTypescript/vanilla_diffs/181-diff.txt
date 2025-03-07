@@ -1,0 +1,26 @@
+```diff
+--- test_files/181-original.txt	2025-03-07 19:06:30
++++ test_files/181-modified.txt	2025-03-07 19:06:30
+@@ -7,9 +7,9 @@
+ from pathlib import Path
+ import os
+ load_dotenv()
+-import agentops
+-AGENTOPS_API_KEY = os.environ["AGENTOPS_API_KEY"]
+-agentops.init(AGENTOPS_API_KEY)
++# import agentops
++# AGENTOPS_API_KEY = os.environ["AGENTOPS_API_KEY"]
++# agentops.init(AGENTOPS_API_KEY)
+ 
+ llm = ChatOpenAI(model='gpt-4o')
+ #Settings.llm = Groq(model="llama3-groq-70b-8192-tool-use-preview")
+@@ -17,7 +17,7 @@
+ 
+ GOOGLE_SHEET_ID = '1i8OwCM_o2E4tmpZ18-2Jgu8G42ntPWoUgGhfbcyxnoo'
+ #GOOGLE_SHEET_LINK + 'https://docs.google.com/spreadsheets/d/1i8OwCM_o2E4tmpZ18-2Jgu8G42ntPWoUgGhfbcyxnoo/edit?gid=0#gid=0z'
+-composio_toolset = ComposioToolSet(output_dir=Path("/Users/composio/Desktop/sample-projects/ppt_builder"))
++composio_toolset = ComposioToolSet(output_dir=Path(os.path.dirname(os.path.realpath(__file__))))
+ tools = composio_toolset.get_tools(actions=[Action.CODEINTERPRETER_EXECUTE_CODE,
+                                             Action.CODEINTERPRETER_GET_FILE_CMD,
+                                             Action.CODEINTERPRETER_RUN_TERMINAL_CMD,
+```

@@ -1,0 +1,80 @@
+```diff
+--- test_files/557-original.txt	2025-03-07 19:07:08
++++ test_files/557-modified.txt	2025-03-07 19:07:08
+@@ -1,7 +1,6 @@
+ ---
+ title: "Newsletter Summarizer"
+ sidebarTitle: "Newsletter Summarizer"
+-icon: "book"
+ description: "This project serves as an example of how to use Composio to seamlessly fetch and summarize newsletter emails. It automatically retrieves recent newsletters, summarizes their content, and sends a well-formatted email to the specified recipient."
+ ---
+ 
+@@ -12,8 +11,6 @@
+     <Tab title="Python">
+     <Card color="#7bee0c" title="Newsletter Summarizer GitHub Repository" icon="github" href="https://www.github.com/ComposioHQ/composio/blob/master/python/examples/newsletter_summarizer/">
+   Explore the complete source code for the Newsletter Summarizer project. This repository contains all the necessary files and scripts to set up and run the Newsletter Summarizer using Composio and Cloudflare.
+-  <CardBody>
+-  </CardBody>
+ </Card>
+ <Steps>
+     <Step title="Import Base Packages">
+@@ -151,8 +148,6 @@
+     <Tab title="Javascript">
+     <Card color="#7bee0c" title="Newsletter Summarizer GitHub Repository" icon="github" href="https://github.com/ComposioHQ/composio/tree/master/js/examples/newsletter_summarizer/newsletter_summarizer_cloudflare">
+   Explore the complete source code for the Newsletter Summarizer project. This repository contains all the necessary files and scripts to set up and run the Newsletter Summarizer using Composio and Cloudflare.
+-  <CardBody>
+-  </CardBody>
+ </Card>
+     <Steps>
+         <Step title="Import base packages">
+@@ -257,26 +252,6 @@
+ 
+ 
+ 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+ ## Putting It All Together
+ 
+ <CodeGroup>
+@@ -388,11 +363,11 @@
+     // Function to set up the GitHub connection for the user if it doesn't exist
+     async function setupUserConnectionIfNotExists(toolset, entityId, c) {
+         const entity = await toolset.client.getEntity(entityId);
+-        const connection = await entity.getConnection('github');
++        const connection = await entity.getConnection({ appName: "GITHUB" });
+ 
+         if (!connection) {
+             // If the user hasn't connected their GitHub account
+-            const connection = await entity.initiateConnection('github');
++            const connection = await entity.initiateConnection({appName: "GITHUB"});
+             console.log('Log in via: ', connection.redirectUrl);
+             c.json({ redirectUrl: connection.redirectUrl, message: 'Please log in to continue and then call this API again.' });
+         }
+@@ -411,7 +386,7 @@
+             const entity = await toolset.client.getEntity('default');
+             await setupUserConnectionIfNotExists(toolset, entity.id, c);
+             // Get the required tools for the AI task
+-            const tools = await toolset.getActions({ actions: ['gmail_fetch_emails', 'gmail_send_email'] }, entity.id);
++            const tools = await toolset.getTools({ actions: ['gmail_fetch_emails', 'gmail_send_email'] }, entity.id);
+             const instruction = `
+                 "Fetch the most recent newsletter emails from the inbox. "
+                 "Look for emails with subjects containing words like 'newsletter', 'update', or 'digest'. "
+```

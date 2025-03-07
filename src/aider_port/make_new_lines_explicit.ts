@@ -1,6 +1,7 @@
 import { hunkToBeforeAfter } from './aider_udiff';
 import { diffLines } from './diff_lines';
 import unidiff from "unidiff";
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Makes new lines explicit in a hunk by adjusting the context to better match the content.
@@ -11,6 +12,10 @@ import unidiff from "unidiff";
  * @returns An adjusted hunk that makes new lines more explicit
  */
 export function makeNewLinesExplicit(content: string, hunk: string[]): string[] {
+  // Normalize line endings
+  content = normalizeLineEndings(content);
+  hunk = hunk.map(normalizeLineEndings);
+  
   const [before, after] = hunkToBeforeAfter(hunk) as [string, string];
 
   // Create a diff that shows what's different between the hunk's "before" text

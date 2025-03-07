@@ -1,0 +1,108 @@
+```diff
+--- test_files/073-original.txt	2025-03-07 19:06:17
++++ test_files/073-modified.txt	2025-03-07 19:06:18
+@@ -1,5 +1,6 @@
+ """Test runtime decorator."""
+ 
++import re
+ 
+ import pytest
+ import typing_extensions as te
+@@ -49,11 +50,11 @@
+     assert tool.gid == "runtime"
+ 
+     response = tool.execute(action=multiply.enum, params={"a": 1, "b": 2})
+-    assert not response["successfull"]
++    assert not response["successful"]
+     assert "Following fields are missing: {'c'}" in response["error"]
+ 
+     response = tool.execute(action=multiply.enum, params={"a": 1, "b": 2, "c": 3})
+-    assert response["successfull"]
++    assert response["successful"]
+     assert response["error"] is None
+     assert response["data"]["result"] == 6
+ 
+@@ -61,7 +62,7 @@
+ def test_annotated_args() -> None:
+     @action(toolname="math")
+     def square(
+-        number: te.Annotated[int, "Number to calculcate square"]
++        number: te.Annotated[int, "Number to calculate square"]
+     ) -> te.Annotated[int, "Square of a number"]:
+         """Calculate square of a number"""
+         return number**2
+@@ -70,7 +71,7 @@
+         "properties": {
+             "number": {
+                 "default": None,
+-                "description": "Number to calculcate square",
++                "description": "Number to calculate square",
+                 "title": "Number",
+                 "type": "integer",
+             }
+@@ -79,7 +80,7 @@
+         "type": "object",
+     }
+ 
+-    assert square.response.schema().get("properties").get("result") == {  # type: ignore
++    assert square.response.schema().get("properties").get("data").get("properties").get("result") == {  # type: ignore
+         "default": None,
+         "description": "Square of a number",
+         "title": "Result",
+@@ -114,12 +115,28 @@
+             return number**2
+ 
+ 
++def test_missing_return_type() -> None:
++    with pytest.raises(
++        InvalidRuntimeAction,
++        match="Please add return type on runtime action `square`",
++    ):
++
++        @action(toolname="math")
++        def square(number: int):
++            """
++            Calculate square of a number
++
++            :return result: Square of number
++            """
++            return number**2
++
++
+ def test_tool_namespace() -> None:
+     """Test to make sure two runtime actions can be defined using one tool name."""
+ 
+     @action(toolname="maths")
+     def square(
+-        number: te.Annotated[int, "Number to calculcate square"]
++        number: te.Annotated[int, "Number to calculate square"]
+     ) -> te.Annotated[int, "Square of a number"]:
+         """Calculate square of a number"""
+         return number**2
+@@ -136,3 +153,25 @@
+     assert len(actions) == 2
+     assert square in actions
+     assert inverse in actions
++
++
++def test_untyped_param() -> None:
++    """Test if error is raised if a param is missing type annotation."""
++    with pytest.raises(
++        InvalidRuntimeAction,
++        match=re.escape(
++            "Following arguments are missing type annotations: {'execute_request'}"
++        ),
++    ):
++
++        # pylint: disable=unused-argument
++        @action(toolname="github")
++        def list_prs(owner: str, repo: str, execute_request) -> list[str]:
++            """
++            List PRs for a repo
++
++            :param owner: Owner
++            :param repo: Repository
++            :return repositories: Repositories
++            """
++            return []
+```

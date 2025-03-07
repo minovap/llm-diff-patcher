@@ -1,0 +1,149 @@
+```diff
+--- test_files/078-original.txt	2025-03-07 19:06:18
++++ test_files/078-modified.txt	2025-03-07 19:06:18
+@@ -21,7 +21,9 @@
+ from composio.tools.local.filetool.actions.write import Write, WriteRequest
+ from composio.tools.toolset import ComposioToolSet
+ 
++from tests.conftest import skip_if_ci
+ 
++
+ @pytest.fixture(scope="module")
+ def temp_dir():
+     with tempfile.TemporaryDirectory() as tmpdirname:
+@@ -84,8 +86,12 @@
+ 
+         # Open file
+         open_response = open_action.execute(OpenFileRequest(file_path="file2.py"), {})
+-        assert "def test_function():" in open_response.lines[1]
++        assert "def test_function():" in open_response.lines
+ 
++        with pytest.raises(Exception, match="out of bounds"):
++            open_response = open_action.execute(
++                OpenFileRequest(file_path="file2.py", line_number=10), {}
++            )
+         # Edit file
+         edit_response = edit_action.execute(
+             EditFileRequest(
+@@ -97,7 +103,7 @@
+ 
+         # Verify changes
+         open_response = open_action.execute(OpenFileRequest(file_path="file2.py"), {})
+-        assert "Hello, Edited World!" in open_response.lines[2]
++        assert "Hello, Edited World!" in open_response.lines
+ 
+     def test_create_and_write_file(self, file_manager, temp_dir):
+         create_action = CreateFile()
+@@ -173,7 +179,7 @@
+ 
+         # Verify changes
+         open_response = open_action.execute(OpenFileRequest(file_path="file1.txt"), {})
+-        assert "New content line" in open_response.lines[1]
++        assert "New content line" in open_response.lines
+ 
+         # Search again, should find the new content
+         grep_response = grep_action.execute(SearchWordRequest(word="New content"), {})
+@@ -228,10 +234,10 @@
+         write_action._filemanagers = lambda: file_manager
+ 
+         # Try to open a non-existent file
+-        response = open_action.execute(
+-            OpenFileRequest(file_path="non_existent.txt"), {}
+-        )
+-        assert response.error is not None
++        with pytest.raises(Exception, match="File not found"):
++            response = open_action.execute(
++                OpenFileRequest(file_path="non_existent.txt"), {}
++            )
+ 
+         # Try to write to a directory
+         response = write_action.execute(
+@@ -274,6 +280,7 @@
+             create_action.execute(CreateFileRequest(path="", is_directory=False), {})
+         assert "Path cannot be empty" in str(excinfo.value)
+ 
++    @skip_if_ci(reason="Timeout")
+     def test_filetool_with_toolset(self, file_manager, temp_dir):
+         toolset = ComposioToolSet(workspace_config=WorkspaceType.Host())
+ 
+@@ -284,21 +291,21 @@
+ 
+         # List files
+         list_response = toolset.execute_action(Action.FILETOOL_LIST_FILES, {})
+-        assert ("file1.txt", "file") in list_response["files"]
+-        assert ("dir1", "dir") in list_response["files"]
++        assert ("file1.txt", "file") in list_response["data"]["files"]
++        assert ("dir1", "dir") in list_response["data"]["files"]
+ 
+         # Find .txt files
+         find_response = toolset.execute_action(
+             Action.FILETOOL_FIND_FILE, {"pattern": "*.txt"}
+         )
+-        assert "file1.txt" in find_response["results"]
+-        assert os.path.join("dir1", "file3.txt") in find_response["results"]
++        assert "file1.txt" in find_response["data"]["results"]
++        assert os.path.join("dir1", "file3.txt") in find_response["data"]["results"]
+ 
+         # Search for content
+         grep_response = toolset.execute_action(
+             Action.FILETOOL_SEARCH_WORD, {"word": "content"}
+         )
+-        assert "file1.txt" in grep_response["results"]
++        assert "file1.txt" in grep_response["data"]["results"]
+ 
+         # Edit file
+         edit_response = toolset.execute_action(
+@@ -310,13 +317,35 @@
+                 "end_line": 1,
+             },
+         )
+-        assert "New content line" in edit_response["updated_text"]
++        assert "New content line" in edit_response["data"]["updated_text"]
+ 
++        # Edit file
++        edit_response = toolset.execute_action(
++            Action.FILETOOL_EDIT_FILE,
++            {
++                "file_path": "file1.txt",
++                "start_line": 1,
++                "end_line": 1,
++            },
++        )
++        assert "Invalid request data provided" in edit_response["error"]
++
++        # Edit file
++        edit_response = toolset.execute_action(
++            Action.FILETOOL_EDIT_FILE,
++            {
++                "file_path": "file1.txt",
++                "start_line": 1,
++                "end_line": 1,
++            },
++        )
++        assert "Invalid request data provided" in edit_response["error"]
++
+         # Verify changes
+         open_response = toolset.execute_action(
+             Action.FILETOOL_OPEN_FILE, {"file_path": "file1.txt"}
+         )
+-        assert "New content line" in open_response["lines"][1]
++        assert "New content line" in open_response["data"]["lines"]
+ 
+         # Change directory
+         chdir_response = toolset.execute_action(
+@@ -326,7 +355,7 @@
+ 
+         # List files in new directory
+         list_response = toolset.execute_action(Action.FILETOOL_LIST_FILES, {})
+-        assert ("file3.txt", "file") in list_response["files"]
++        assert ("file3.txt", "file") in list_response["data"]["files"]
+ 
+         # Change back to parent directory
+         toolset.execute_action(Action.FILETOOL_CHANGE_WORKING_DIRECTORY, {"path": ".."})
+@@ -346,4 +375,4 @@
+         open_response = toolset.execute_action(
+             Action.FILETOOL_OPEN_FILE, {"file_path": "new_file.txt"}
+         )
+-        assert "This is a new file" in open_response["lines"][1]
++        assert "This is a new file" in open_response["data"]["lines"]
+```

@@ -1,0 +1,50 @@
+```diff
+--- test_files/069-original.txt	2025-03-07 19:06:17
++++ test_files/069-modified.txt	2025-03-07 19:06:17
+@@ -5,14 +5,14 @@
+ from pathlib import Path
+ 
+ import dotenv
+-from composio_openai import ComposioToolSet
+ from openai import OpenAI
+ from pydantic import BaseModel, Field
+ 
+-from composio import Shell
+-from composio.tools.local.base.decorators import action
++from composio import Shell, WorkspaceType, action
+ 
++from composio_openai import ComposioToolSet
+ 
++
+ class GitRepoRequest(BaseModel):
+     """Git repo request."""
+ 
+@@ -30,15 +30,15 @@
+ 
+ 
+ @action(toolname="git", runs_on_shell=True)
+-def get_git_repo(request_data: GitRepoRequest, metadata: dict) -> GitRepoResponse:
++def get_git_repo(request: GitRepoRequest, metadata: dict) -> GitRepoResponse:
+     """Get git repo for working directory."""
+     shell = metadata["workspace"].shells.recent
+-    shell.exec(f"cd {request_data.working_directory}")
++    shell.exec(f"cd {request.working_directory}")
+     output = (
+         shell.exec("git config --get remote.origin.url").get("stdout").lstrip().rstrip()
+     )
+     _, repo = output.split(":")
+-    author, name = repo.split("/")
++    *_, author, name = repo.split("/")
+     return GitRepoResponse(name=name, author=author)
+ 
+ 
+@@ -61,7 +61,7 @@
+ 
+ # Initialize tools.
+ openai_client = OpenAI()
+-composio_toolset = ComposioToolSet()
++composio_toolset = ComposioToolSet(workspace_config=WorkspaceType.Host())
+ 
+ # Define task.
+ task = "Can you give me the name of the git repository working directory"
+```

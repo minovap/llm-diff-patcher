@@ -1,0 +1,76 @@
+```diff
+--- test_files/075-original.txt	2025-03-07 19:06:18
++++ test_files/075-modified.txt	2025-03-07 19:06:18
+@@ -3,7 +3,6 @@
+ import typing as t
+ 
+ from composio import Action
+-from composio.tools.base.runtime import action
+ from composio.tools.env.base import Workspace, WorkspaceConfigType
+ from composio.tools.env.factory import (
+     DockerWorkspace,
+@@ -14,18 +13,11 @@
+     WorkspaceType,
+ )
+ 
++from tests.conftest import E2E
++from tests.data.custom_tools import say
+ 
+-@action(toolname="cow")
+-def say(message: str) -> str:
+-    """
+-    Make cow say.
+ 
+-    :param message: Message string
+-    :return output: Output string
+-    """
+-    return f"Cow says: {message}"
+-
+-
++@E2E
+ class BaseFactoryTest:
+     type: t.Type[Workspace]
+     config: WorkspaceConfigType
+@@ -35,6 +27,10 @@
+     def setup_class(cls) -> None:
+         cls.workspace = WorkspaceFactory.new(config=cls.config)
+ 
++    @classmethod
++    def teardown_class(cls) -> None:
++        cls.workspace.teardown()
++
+     def test_init(self) -> None:
+         assert isinstance(self.workspace, self.type)
+ 
+@@ -45,7 +41,7 @@
+             metadata={},
+         )
+ 
+-        assert response["successfull"]
++        assert response.get("successful", response.get("successfull"))
+         assert "stdout" in response["data"]
+         assert response["data"]["exit_code"] == 0
+ 
+@@ -56,7 +52,7 @@
+             metadata={},
+         )
+ 
+-        assert response["successfull"]
++        assert response.get("successful", response.get("successfull"))
+         assert response["data"]["output"] == "Cow says: Hello, World!"
+ 
+ 
+@@ -71,10 +67,12 @@
+ 
+ 
+ class TestE2B(BaseFactoryTest):
++    # If this test is failing make sure `Dockerfile.dev` is up to date and run `make e2b-dev`
+     type = E2BWorkspace
+     config = WorkspaceType.E2B(template="bg8v5hkbhq1w09i5h65u")
+ 
+ 
+ class TestFlyIO(BaseFactoryTest):
++    # If this test is failing make sure `Dockerfile.dev` is up to date and run `make publish-dev`
+     type = FlyIOWorkspace
+     config = WorkspaceType.FlyIO(image="composio/composio:dev")
+```

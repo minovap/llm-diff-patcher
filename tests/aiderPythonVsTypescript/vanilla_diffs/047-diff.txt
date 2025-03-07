@@ -1,0 +1,38 @@
+```diff
+--- test_files/047-original.txt	2025-03-07 19:06:15
++++ test_files/047-modified.txt	2025-03-07 19:06:15
+@@ -5,11 +5,12 @@
+ import os
+ 
+ import dotenv
+-from composio_crewai import App, ComposioToolSet
+-from crewai import Agent, Task
++from crewai import Agent, Crew, Task
+ from langchain_openai import ChatOpenAI
+ 
++from composio_crewai import App, ComposioToolSet
+ 
++
+ # Load environment variables from .env
+ dotenv.load_dotenv()
+ 
+@@ -35,10 +36,15 @@
+ 
+ # Define task
+ task = Task(
+-    description="Star a repo SamparkAI/docs on GitHub",
++    description=(
++        "Star a repo composiohq/composio on GitHub, if the action is successful "
++        "include Action executed successfully"
++    ),
+     agent=crewai_agent,
+     expected_output="if the star happened",
+ )
+ 
+-# Execute task
+-task.execute()
++my_crew = Crew(agents=[crewai_agent], tasks=[task])
++
++result = my_crew.kickoff()
++print(result)
+```

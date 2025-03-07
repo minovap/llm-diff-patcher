@@ -1,0 +1,13 @@
+```diff
+--- test_files/083-original.txt	2025-03-07 19:06:19
++++ test_files/083-modified.txt	2025-03-07 19:06:19
+@@ -19,7 +19,7 @@
+     ), pytest.raises(
+         ValueError,
+         match=(
+-            "Incorrect format for base_url: http://url. Format should be on of follwing {https://backend.composio.dev/api, https://staging-backend.composio.dev/api, http://localhost:9900/api}"
++            "Incorrect format for base_url: http://url. Format should be on of following {https://backend.composio.dev/api, https://staging-backend.composio.dev/api, http://localhost:9900/api}"
+         ),
+     ):
+         get_web_url("/url")
+```

@@ -1,0 +1,62 @@
+```diff
+--- test_files/156-original.txt	2025-03-07 19:06:27
++++ test_files/156-modified.txt	2025-03-07 19:06:27
+@@ -9,13 +9,13 @@
+ # Initialize Composio tools
+ composio_toolset = ComposioToolSet()
+ 
+-schedule_tool = composio_toolset.get_actions(
++schedule_tool = composio_toolset.get_tools(
+     actions=[
+         Action.GOOGLECALENDAR_FIND_FREE_SLOTS,
+         Action.GOOGLECALENDAR_CREATE_EVENT,
+     ]
+ )
+-email_tool = composio_toolset.get_actions(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
++email_tool = composio_toolset.get_tools(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
+ 
+ date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+ timezone = datetime.now().astimezone().tzinfo
+\ No newline at end of file
+@@ -29,18 +29,9 @@
+     Current DateTime: {date_time}. All the conversations happen in {timezone} timezone.
+     Pass empty config ("config": {{}}) for the function calls, if you get an error about not passing config.""",
+     run_id="",
+-    tools=schedule_tool
++    tools=schedule_tool # type: ignore
+ )
+ 
+-def extract_sender_email(payload):
+-    for header in payload["payload"]["headers"]:
+-        if header["name"] == "From":
+-            match = re.search(r"[\w\.-]+@[\w\.-]+", header["value"])
+-            if match:
+-                return match.group(0)
+-    return None
+-
+-
+ listener = composio_toolset.create_trigger_listener()
+ 
+ @listener.callback(filters={"trigger_name": "gmail_new_gmail_message"})
+\ No newline at end of file
+@@ -48,8 +39,8 @@
+     print("New message received")
+     payload = event.payload
+     thread_id = payload.get("threadId")
+-    message = payload.get("snippet")
+-    sender_mail = extract_sender_email(payload)
++    message = payload.get("messageText")
++    sender_mail = payload.get("sender")
+     if sender_mail is None:
+         print("No sender email found")
+         return
+\ No newline at end of file
+@@ -72,4 +63,4 @@
+ 
+ if __name__ == "__main__":
+     print("Subscription created!")
+-    listener.listen()
+\ No newline at end of file
++    listener.wait_forever()
+\ No newline at end of file
+```

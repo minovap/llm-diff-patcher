@@ -1,0 +1,34 @@
+```diff
+--- test_files/431-original.txt	2025-03-07 19:06:59
++++ test_files/431-modified.txt	2025-03-07 19:06:59
+@@ -51,7 +51,7 @@
+       console.log('Setting up user connection for entityId:', entityId);
+       const toolset = new CloudflareToolSet({ apiKey: this.env.COMPOSIO_API_KEY });
+       const entity = await toolset.client.getEntity(entityId);
+-      const connection = await entity.getConnection('gmail');
++      const connection = await entity.getConnection({app:'gmail'});
+ 
+       if (!connection) {
+         const newConnection = await entity.initiateConnection('gmail');
+\ No newline at end of file
+@@ -91,7 +91,7 @@
+       entity = await toolset.client.getEntity('default');
+   
+       // Step 1: Fetch Emails
+-      fetchTools = await toolset.getActions(
++      fetchTools = await toolset.getTools(
+         { actions: ['gmail_fetch_emails'] },
+         entity.id
+       );
+\ No newline at end of file
+@@ -130,7 +130,7 @@
+       const summary = summaryResponse.choices[0].message.content;
+   
+       // Step 3: Send Summarized Email
+-      sendTools = await toolset.getActions(
++      sendTools = await toolset.getTools(
+         { actions: ['GMAIL_SEND_EMAIL'] },
+         entity.id
+       );
+\ No newline at end of file
+```

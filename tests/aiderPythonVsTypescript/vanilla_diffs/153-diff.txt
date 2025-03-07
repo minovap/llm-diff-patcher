@@ -1,0 +1,94 @@
+```diff
+--- test_files/153-original.txt	2025-03-07 19:06:27
++++ test_files/153-modified.txt	2025-03-07 19:06:27
+@@ -4,20 +4,22 @@
+ from composio.client.collections import TriggerEventData
+ from composio_crewai import Action, ComposioToolSet
+ from crewai import Agent, Crew, Task, Process
++from dotenv import load_dotenv
+ from langchain_openai import ChatOpenAI
+ 
++load_dotenv()
+ llm = ChatOpenAI(model="gpt-4-turbo")
+ # llm = ChatGroq(model='llama3-70b-8192', api_key=os.environ['GROQ_API_KEY'])
+ 
+ composio_toolset = ComposioToolSet()
+ 
+-schedule_tool = composio_toolset.get_actions(
++schedule_tool = composio_toolset.get_tools(
+     actions=[
+         Action.GOOGLECALENDAR_FIND_FREE_SLOTS,
+         Action.GOOGLECALENDAR_CREATE_EVENT,
+     ]
+ )
+-email_tool = composio_toolset.get_actions(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
++email_tool = composio_toolset.get_tools(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
+ date_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+ timezone = datetime.now().astimezone().tzinfo
+ 
+@@ -30,28 +32,11 @@
+     Pass empty config ("config": {{}}) for the function calls, if you get an error about not passing config.""",
+     verbose=True,
+     llm=llm,
+-    tools=[schedule_tool],
++    tools=schedule_tool, # type: ignore
+     allow_delegation=False,
+ )
+ 
+ 
+-def extract_sender_email(payload):
+-    delivered_to_header_found = False
+-    for header in payload["headers"]:
+-        if header.get("name", "") == "Delivered-To" and header.get("value", "") != "":
+-            delivered_to_header_found = True
+-    print("delivered_to_header_found: ", delivered_to_header_found)
+-    if not delivered_to_header_found:
+-        return None
+-    for header in payload["headers"]:
+-        if header["name"] == "From":
+-            # Regular expression to extract email from the 'From' header value
+-            match = re.search(r"[\w\.-]+@[\w\.-]+", header["value"])
+-            if match:
+-                return match.group(0)
+-    return None
+-
+-
+ listener = composio_toolset.create_trigger_listener()
+ 
+ 
+@@ -60,8 +45,8 @@
+     print("here in the function")
+     payload = event.payload
+     thread_id = payload.get("threadId")
+-    message = payload.get("snippet")
+-    sender_mail = extract_sender_email(payload["payload"])
++    message = payload.get("messageText")
++    sender_mail = payload.get("sender")
+     if sender_mail is None:
+         print("No sender email found")
+         return
+@@ -88,19 +73,19 @@
+         should describe what the meeting is about""",
+         expected_output="emails was drafted",
+         agent=email_assistant,
+-        tools=[email_tool],
++        tools=email_tool, # type: ignore
+         context=[analyze_email_task],
+     )
+ 
+     email_processing_crew = Crew(
+         agents=[email_assistant],
+         tasks=[analyze_email_task, draft_email_task],
+-        verbose=1,
++        verbose=True,
+         process=Process.sequential,
+     )
+     result = email_processing_crew.kickoff()
+-    return result
++    return result.raw # type: ignore
+ 
+ 
+ print("Subscription created!")
+-listener.listen()
++listener.wait_forever()
+```

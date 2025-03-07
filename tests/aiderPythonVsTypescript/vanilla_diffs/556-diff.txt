@@ -1,0 +1,12 @@
+```diff
+--- test_files/556-original.txt	2025-03-07 19:07:08
++++ test_files/556-modified.txt	2025-03-07 19:07:08
+@@ -1,7 +1,6 @@
+ ---
+ title: "RAG Tool Agent"
+ sidebarTitle: "RAG Tool Agent"
+-icon: "database"
+ description: "This project involves setting up and running a system of agents to add content to a RAG (Retrieval-Augmented Generation) tool, perform queries, and return relevant information. We use Composio to setup this Local Tool and OpenAI GPT-4o to power the agents. Follow this guide to set up and run the project."
+ ---
+ 
+```

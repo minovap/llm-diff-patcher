@@ -1,0 +1,13 @@
+```diff
+--- test_files/022-original.txt	2025-03-07 19:06:14
++++ test_files/022-modified.txt	2025-03-07 19:06:14
+@@ -9,7 +9,7 @@
+ 
+ setup(
+     name="composio_smol",
+-    version="0.7.1",
++    version="0.7.6",
+     author="Composio",
+     author_email="tech@composio.dev",
+     description="Use Composio to get array of strongly typed tools for Smol Agents",
+```

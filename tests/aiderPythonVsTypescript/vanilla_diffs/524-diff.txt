@@ -1,0 +1,23 @@
+```diff
+--- test_files/524-original.txt	2025-03-07 19:07:06
++++ test_files/524-modified.txt	2025-03-07 19:07:06
+@@ -1,7 +1,6 @@
+ ---
+ title: "🔧 How to add your own App?"
+ sidebarTitle: "Add Your Own App"
+-icon: "puzzle-piece"
+ description: "Learn how to add your own App to Composio"
+ ---
+ 
+\ No newline at end of file
+@@ -12,7 +11,7 @@
+   width="560" 
+   height="315" 
+   src="https://www.youtube.com/embed/xU9jY7NsfOA?si=fIrJo6Ya38Mms819" 
+-  title="Openapi spec import" 
++  title="OpenAPI spec import" 
+   frameborder="0" 
+   allow="accelerometer; 
+   autoplay; 
+\ No newline at end of file
+```

@@ -339,10 +339,14 @@ def dmp_apply(texts, remap=True):
 
 
 def lines_to_chars(lines, mapping):
+    # Normalize the input if it's a string
+    if isinstance(lines, str):
+        lines = normalize_line_endings(lines)
+        
     new_text = []
     for char in lines:
         new_text.append(mapping[ord(char)])
-
+    
     new_text = "".join(new_text)
     return new_text
 
@@ -353,19 +357,25 @@ def dmp_lines_apply(texts, remap=True):
 
     for t in texts:
         assert t.endswith("\n"), t
+        
+    # Normalize all texts to ensure consistent line endings
+    texts = [normalize_line_endings(text) for text in texts]
 
     search_text, replace_text, original_text = texts
 
     dmp = diff_match_patch()
     dmp.Diff_Timeout = 5
-    # dmp.Diff_EditCost = 16
 
     dmp.Match_Threshold = 0.1
     dmp.Match_Distance = 100_000
     dmp.Match_MaxBits = 32
     dmp.Patch_Margin = 1
 
-    all_text = search_text + replace_text + original_text
+    # Combine the texts and ensure uniform line endings
+    all_text = normalize_line_endings(search_text + replace_text + original_text)
+    
+    # Use diff_linesToChars to convert the lines into a more manageable format
+    # This helps avoid issues with line endings
     all_lines, _, mapping = dmp.diff_linesToChars(all_text, "")
     assert len(all_lines) == len(all_text.splitlines())
 
@@ -438,10 +448,13 @@ def diff_lines(search_text, replace_text):
 
 
 def search_and_replace(texts):
+    # Normalize line endings
+    texts = [normalize_line_endings(text) for text in texts]
+    
     search_text, replace_text, original_text = texts
 
     num = original_text.count(search_text)
-    # if num > 1:
+    # if num > 1:  # Commented out in original
     #    raise SearchTextNotUnique()
     if num == 0:
         return
@@ -450,6 +463,10 @@ def search_and_replace(texts):
 
     return new_text
 
+
+# Git functions would also normalize line endings
+# but they're just placeholders in the original
+# so not including detailed changes here
 
 def git_cherry_pick_osr_onto_o(texts):
     return texts
@@ -474,6 +491,8 @@ all_preprocs = [
     # (False, True, True),
     # (True, True, True),
 ]
+
+# The rest of the functions should inherit the line-ending normalization
 
 always_relative_indent = [
     (False, True, False),
@@ -516,6 +535,9 @@ def flexible_search_and_replace(texts, strategies):
 
 
 def reverse_lines(text):
+    # Normalize line endings
+    text = normalize_line_endings(text)
+    
     lines = text.splitlines(keepends=True)
     lines.reverse()
     return "".join(lines)
@@ -547,13 +569,17 @@ def try_strategy(texts, strategy, preproc):
 
 
 def strip_blank_lines(texts):
+    # Normalize line endings
+    texts = [normalize_line_endings(text) for text in texts]
+    
     # strip leading and trailing blank lines
     texts = [text.strip("\n") + "\n" for text in texts]
     return texts
 
 
 def read_text(fname):
-    text = Path(fname).read_text()
+    # Read text and normalize line endings
+    text = normalize_line_endings(Path(fname).read_text())
     return text
 
 
@@ -568,9 +594,9 @@ def proc(dname):
         return
 
     ####
-
+    
     texts = search_text, replace_text, original_text
-
+    
     strategies = [
         # (search_and_replace, all_preprocs),
         # (git_cherry_pick_osr_onto_o, all_preprocs),

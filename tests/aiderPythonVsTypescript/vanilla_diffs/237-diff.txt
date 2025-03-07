@@ -1,0 +1,13 @@
+```diff
+--- test_files/237-original.txt	2025-03-07 19:06:36
++++ test_files/237-modified.txt	2025-03-07 19:06:36
+@@ -13,7 +13,7 @@
+         alias="folder_id",
+         description="",
+     )
+-    archived: bool = Field(
++    archived: t.Optional[bool] = Field(
+         default=None,
+         alias="archived",
+         description="",
+```

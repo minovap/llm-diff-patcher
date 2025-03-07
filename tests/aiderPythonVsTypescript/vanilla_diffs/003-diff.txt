@@ -1,32 +1,34 @@
 ```diff
- const inventory = [
-   { id: 1, name: "Laptop", price: 999.99, stock: 15 },
-   { id: 2, name: "Mouse", price: 29.99, stock: 50 },
-   { id: 3, name: "Keyboard", price: 59.99, stock: 30 },
-   { id: 4, name: "Monitor", price: 199.99, stock: 10 },
- ];
+--- test_files/003-original.txt	2025-03-07 19:06:12
++++ test_files/003-modified.txt	2025-03-07 19:06:12
+@@ -5,13 +5,14 @@
+ import os
  
- function getItemById(id) {
-   return inventory.find(item => item.id === id);
- }
+ import dotenv
+-from composio_lyzr import Action, ComposioToolSet
+ from lyzr_automata import Agent, Task
+ from lyzr_automata.ai_models.openai import OpenAIModel
+ from lyzr_automata.pipelines.linear_sync_pipeline import LinearSyncPipeline
+ from lyzr_automata.tasks.task_literals import InputType, OutputType
  
-+function getTotalValue() {
-+  return inventory.reduce((total, item) => {
-+    return total + (item.price * item.stock);
-+  }, 0);
-+}
++from composio_lyzr import Action, ComposioToolSet
+ 
 +
--function displayInventory() {
-+function displayInventory(sortByPrice = false) {
-+  const items = [...inventory];
-+  
-+  if (sortByPrice) {
-+    items.sort((a, b) => a.price - b.price);
-+  }
-+  
--  inventory.forEach(item => {
-+  items.forEach(item => {
-     console.log(`${item.name}: $${item.price} (${item.stock} in stock)`);
-   });
- }
+ # Load environment variables from .env
+ dotenv.load_dotenv()
+ 
+@@ -27,11 +28,11 @@
+ composio_toolset = ComposioToolSet()
+ 
+ # Define task
+-instructions = "Star a repo SamparkAI/docs on GitHub"
++instructions = "Star a repo composiohq/composio on GitHub"
+ 
+ # Get required tool
+ (github_tool,) = composio_toolset.get_actions(
+-    actions=[Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER]
++    actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+ )
+ 
+ # Define agent
 ```

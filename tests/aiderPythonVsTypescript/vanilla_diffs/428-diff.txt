@@ -1,0 +1,41 @@
+```diff
+--- test_files/428-original.txt	2025-03-07 19:06:59
++++ test_files/428-modified.txt	2025-03-07 19:06:59
+@@ -10,14 +10,16 @@
+ const GOOGLEDOCS_CREATE_DOCUMENT = async ({ title, text }) => {
+ 	const toolset = new OpenAIToolSet({
+         apiKey: process.env.COMPOSIO_API_KEY,
+-		entityId: "default_user",
++		entityId: "default",
+     });
+-	const response = await toolset.client.getEntity("default_user").execute(
+-		'GOOGLEDOCS_CREATE_DOCUMENT',
+-		{
++	const response = await toolset.client.getEntity("default").execute({
++		actionName:'GOOGLEDOCS_CREATE_DOCUMENT',
++		params:{
+ 			title,
+ 			text
+ 		}
++	}
++
+ 	);
+ 	return response;
+ };
+@@ -54,12 +56,12 @@
+ 	const threadId = await res.headers.get('lb-thread-id');
+ 
+ 	const { raw } = data;
+-
++	console.log(raw)
+ 	// get the response message from the model
+-	const responseMessage = raw.choices[0].message;
++	const responseMessage = raw[''];
+ 
+ 	// get the tool calls from the response message
+-	const toolCalls = responseMessage.tool_calls;
++	const toolCalls = responseMessage;
+ 
+ 	if (toolCalls) {
+ 		const toolMessages = [];
+```

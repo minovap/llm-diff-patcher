@@ -1,0 +1,13 @@
+```diff
+--- test_files/188-original.txt	2025-03-07 19:06:31
++++ test_files/188-modified.txt	2025-03-07 19:06:31
+@@ -10,7 +10,7 @@
+ 
+ # Get tools
+ composio_toolset = ComposioToolSet()
+-tools = composio_toolset.get_tools(apps=[App.FILETOOL, App.SHELLTOOL])
++tools = composio_toolset.get_tools(apps=[App.FILETOOL, App.SHELLTOOL, App.CODEINTERPRETER])
+ 
+ # Take directory path as input
+ path = str(input("Enter the directory path (e.g. /home/user/programs/hello-world): "))
+```

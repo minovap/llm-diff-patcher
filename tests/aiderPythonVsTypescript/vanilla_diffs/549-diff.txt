@@ -1,0 +1,12 @@
+```diff
+--- test_files/549-original.txt	2025-03-07 19:07:08
++++ test_files/549-modified.txt	2025-03-07 19:07:08
+@@ -1,7 +1,6 @@
+ ---
+ title: "Newsletter Summarizer"
+ sidebarTitle: "Newsletter Summarizer"
+-icon: "book"
+ description: "This project serves as an example of how to use Composio to seamlessly fetch and summarize newsletter emails. It automatically retrieves recent newsletters, summarizes their content, and sends a well-formatted email to the specified recipient."
+ ---
+ 
+```

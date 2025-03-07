@@ -1,0 +1,36 @@
+```diff
+--- test_files/189-original.txt	2025-03-07 19:06:31
++++ test_files/189-modified.txt	2025-03-07 19:06:31
+@@ -6,15 +6,17 @@
+ from llama_index.core.agent import FunctionCallingAgentWorker
+ from llama_index.core.llms import ChatMessage
+ from llama_index.llms.groq import Groq
++from llama_index.llms.openai import OpenAI
+ from datetime import datetime
+ from llama_index.core import Settings
+ 
+ # Load environment variables from .env file
+ dotenv.load_dotenv()
+-Settings.llm = Groq(model="llama3-groq-70b-8192-tool-use-preview", api_key=os.environ["GROQ_API_KEY"])
+-llm = Groq(model="llama-3.2-3b-preview", api_key=os.environ["GROQ_API_KEY"])
++#Settings.llm = Groq(model="llama3-groq-70b-8192-tool-use-preview", api_key=os.environ["GROQ_API_KEY"])
++#llm = Groq(model="llama-3.2-3b-preview", api_key=os.environ["GROQ_API_KEY"])
++Settings.llm = OpenAI(model="gpt-4o")
++llm = OpenAI(model="gpt-4o")
+ 
+-
+ # Initialize the ComposioToolSet
+ toolset = ComposioToolSet()
+ 
+\ No newline at end of file
+@@ -48,7 +50,7 @@
+ 
+ # Initialize a FunctionCallingAgentWorker with the tools, LLM, and system messages
+ agent = FunctionCallingAgentWorker(
+-    tools=tools,  # Tools available for the agent to use
++    tools=tools,  # Tools available for the agent to use # type: ignore
+     llm=llm,  # Language model for processing requests
+     prefix_messages=prefix_messages,  # Initial system messages for context
+     max_function_calls=10,  # Maximum number of function calls allowed
+\ No newline at end of file
+```

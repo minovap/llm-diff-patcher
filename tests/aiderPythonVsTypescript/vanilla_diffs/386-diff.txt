@@ -1,0 +1,34 @@
+```diff
+--- test_files/386-original.txt	2025-03-07 19:06:52
++++ test_files/386-modified.txt	2025-03-07 19:06:52
+@@ -5,12 +5,11 @@
+     composio logout
+ """
+ 
+-
+ import click
+ 
+ from composio.cli.context import Context, pass_context
++from composio.cli.utils.decorators import handle_exceptions
+ from composio.cli.utils.helpfulcmd import HelpfulCmdBase
+-from composio.exceptions import ComposioSDKError
+ 
+ 
+ class Examples(HelpfulCmdBase, click.Command):
+@@ -22,11 +21,10 @@
+ 
+ @click.command(name="logout", cls=Examples)
+ @click.help_option("--help", "-h", "-help")
++@handle_exceptions()
+ @pass_context
+ def _logout(context: Context) -> None:
+     """Logout from the Composio SDK"""
+-    try:
+-        context.user_data.api_key = None
+-        context.user_data.store()
+-    except ComposioSDKError as e:
+-        raise click.ClickException(message=e.message) from e
++    user_data = context.user_data
++    user_data.api_key = None
++    user_data.store()
+```

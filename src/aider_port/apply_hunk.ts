@@ -1,6 +1,7 @@
 import { directlyApplyHunk, hunkToBeforeAfter } from './aider_udiff';
 import { diffLines } from './diff_lines';
 import { makeNewLinesExplicit } from './make_new_lines_explicit';
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Groups an array by consecutive items with the same key.
@@ -85,6 +86,10 @@ function applyPartialHunk(
  * @returns The modified content or undefined if the hunk couldn't be applied
  */
 export function applyHunk(content: string, hunk: string[]): string | undefined {
+  // Normalize line endings
+  content = normalizeLineEndings(content);
+  hunk = hunk.map(normalizeLineEndings);
+  
   const [beforeText, afterText] = hunkToBeforeAfter(hunk) as [string, string];
 
   // Try direct application first
@@ -99,7 +104,7 @@ export function applyHunk(content: string, hunk: string[]): string | undefined {
   // Process the hunk into operations
   // Just consider space vs not-space (x)
   const ops = enhancedHunk
-    .map(line => line[0] || ' ')
+    .map(line => normalizeLineEndings(line)[0] || ' ')
     .join('')
     .replace(/-/g, 'x')
     .replace(/\+/g, 'x')
@@ -132,7 +137,7 @@ export function applyHunk(content: string, hunk: string[]): string | undefined {
   }
 
   // Process sections in triplets (context, changes, context)
-  let modifiedContent = content;
+  let modifiedContent = normalizeLineEndings(content);
   let allDone = true;
 
   for (let i = 2; i < sections.length; i += 2) {

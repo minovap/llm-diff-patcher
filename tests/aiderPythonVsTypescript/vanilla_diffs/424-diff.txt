@@ -1,0 +1,31 @@
+```diff
+--- test_files/424-original.txt	2025-03-07 19:06:58
++++ test_files/424-modified.txt	2025-03-07 19:06:58
+@@ -2,8 +2,8 @@
+ import * as path from 'path';
+ import * as readline from 'readline';
+ import { ComposioToolSet } from "composio-core/lib/sdk/base.toolset";
++import { nanoid } from "nanoid";
+ 
+-
+ type InputType = any;
+ 
+ function readUserInput(
+@@ -68,7 +68,7 @@
+   const name = await readUserInput(
+     'Enter github repository name',
+     'github repository name',
+-    githubRepositoryNameValidator
++    (value: string) => value
+   );
+   const repo = `${owner}/${name}`;
+   const issue = await readUserInput(
+@@ -79,3 +79,7 @@
+   return { repo, issue };
+ }
+ 
++export function getBranchNameFromIssue(issue: string): string {
++  return "swe/" + issue.toLowerCase().replace(/\s+/g, '-') + "-" + nanoid();
++}
++
+```

@@ -1,0 +1,13 @@
+```diff
+--- test_files/520-original.txt	2025-03-07 19:07:06
++++ test_files/520-modified.txt	2025-03-07 19:07:06
+@@ -1,7 +1,6 @@
+ ---
+ title: "AI Market Research Agent"
+ sidebarTitle: "AI Market Researcher"
+-icon: "user-plus"
+ description: "This project demonstrates how to use Composio to create a market research agent."
+ ---
+ 
+\ No newline at end of file
+```

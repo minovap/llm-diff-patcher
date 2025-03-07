@@ -1,0 +1,90 @@
+```diff
+--- test_files/429-original.txt	2025-03-07 19:06:59
++++ test_files/429-modified.txt	2025-03-07 19:06:59
+@@ -1,57 +1,32 @@
++import { Composio, LangchainToolSet } from "composio-core";
++import { z } from "zod";
+ 
+-import { Composio } from "composio-core";
++const toolset = new LangchainToolSet();
+ 
+-const composio = new Composio(process.env.COMPOSIO_API_KEY)
+-
+-// Get this integrationId from
+-// app.composio.dev/app/gmail -> setup gmail integration -> 
+-// Toggle off "use composio app for authentication" -> Click on Save
+-const gmailIntegrationId =  "662a2010-f980-46f4-a4c4-6c2c8efa0769";
+-
+-async function setupUserConnectionIfNotExists(entityId) {
+-    const entity = await composio.getEntity(entityId);
+-    const integration = await entity.integrations.get({
+-        integrationId: gmailIntegrationId
+-    });
+-    const connections = await composio.connectedAccounts.list({
+-        integrationId: gmailIntegrationId,
+-        status: "ACTIVE"
+-    })
+-    const connection = connections.items[0];
+-    if(!connection) {
+-        const connectionRequest = await entity.initiateConnection(
+-            "gmail",
+-            undefined,
+-            undefined,
+-            undefined,
+-            gmailIntegrationId
+-        );
+-
+-        // For GMAIL, Bearer token auth mode - specify the token in the fieldInputs
+-        await connectionRequest.saveUserAccessData({
+-            fieldInputs: {
+-                "token": "<Specify the token here>"
+-            }
+-        });
+-
+-        return connectionRequest.waitUntilActive(10);
+-    }
+-    return connection;
+-}
+-
+ (async() => {
+-    const entity = composio.getEntity("utkarsh");
+-    const connection = await setupUserConnectionIfNotExists(entity.id);
+-
+-    const gmailIntegration = await entity.integrations.get({
+-        integrationId: gmailIntegrationId
++    console.log("Creating action");
++    try {
++    await toolset.createAction({
++        actionName: "helloWorld",
++        description: "This is a test action for handling hello world",
++        inputParams: z.object({
++            name: z.string().optional()
++        }),
++        callback: async (params) => {
++            const { name } = params;
++            return {
++                successful: true,
++                data: {
++                    name: name || "World"
++                }
++            }
++        }
+     });
+ 
+-    const gmailAction = await composio.actions.get({
+-        actionName: "gmail_list_threads"
+-    });
+-    console.log("Connection", connection);
+-    const result = await connection.execute(gmailAction.name, {}, "Hello world");
+-    console.log("Result", result);
+-})();
+-
++    console.log("Tools are registered", await toolset.getTools({
++        actions: ["helloWorld"]
++    }));
++    } catch (error) {
++        console.error("Error creating action", error);
++    }
++})();
+\ No newline at end of file
+```

@@ -1,0 +1,31 @@
+```diff
+--- test_files/432-original.txt	2025-03-07 19:06:59
++++ test_files/432-modified.txt	2025-03-07 19:06:59
+@@ -1,11 +1,17 @@
+-export const APPS = {
+-    // apps list start here
++const APPS = {
++  // apps list start here
++  // apps list end here
++};
+ 
+-    // apps list end here
+-}
++const ACTIONS = {
++  // actions list start here
++  // actions list end here
++};
+ 
+-export const ACTIONS = {
+-    // actions list start here
++const COMPOSIO_VERSION = `0.5.0`;
+ 
+-    // actions list end here
+-}
+\ No newline at end of file
++module.exports = {
++  APPS,
++  ACTIONS,
++  COMPOSIO_VERSION,
++};
+```

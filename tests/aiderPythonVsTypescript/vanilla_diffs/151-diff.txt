@@ -1,0 +1,62 @@
+```diff
+--- test_files/151-original.txt	2025-03-07 19:06:27
++++ test_files/151-modified.txt	2025-03-07 19:06:27
+@@ -35,7 +35,7 @@
+ 
+ slack_tools = composio_toolset.get_tools(
+     actions=[
+-        Action.SLACKBOT_CHAT_POST_MESSAGE,
++        Action.SLACK_SENDS_A_MESSAGE_TO_A_SLACK_CHANNEL,
+     ]
+ )
+ 
+\ No newline at end of file
+@@ -54,7 +54,7 @@
+         },
+     )
+     print("Message sent to Slack channel. Waiting for user response...")
+-    slack_listener.listen()
++    slack_listener.wait_forever()
+ 
+ # Listens to user response on Slack
+ @slack_listener.callback(filters={"trigger_name": "slackbot_receive_message"})
+\ No newline at end of file
+@@ -93,7 +93,7 @@
+                     You should also draft an email in response to the sender of the previous email  
+                 """,
+         verbose=True,
+-        tools=schedule_tool,
++        tools=schedule_tool, # type: ignore
+         llm=llm
+     )
+ 
+\ No newline at end of file
+@@ -117,7 +117,7 @@
+     """,
+     expected_output="Event was scheduler and a reply was drafted",
+     agent=scheduler_agent,
+-    tools = schedule_tool
++    tools = schedule_tool # type: ignore
+     )
+ 
+     crew = Crew(
+\ No newline at end of file
+@@ -129,7 +129,7 @@
+     response = crew.kickoff()
+     print("Response from agent received:")
+     print(response)
+-    return response.raw
++    return response.raw # type: ignore
+ 
+ # Gmail listener Function
+ # We initialize mail content variable mail_message and sender mail here
+\ No newline at end of file
+@@ -156,4 +156,4 @@
+         print(f"Error in callback_gmail_message: {e}")
+ 
+ print("GMAIL LISTENING... Waiting for new messages.")
+-gmail_listener.listen()
+\ No newline at end of file
++gmail_listener.wait_forever()
+\ No newline at end of file
+```

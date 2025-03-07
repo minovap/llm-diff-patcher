@@ -1,0 +1,32 @@
+```diff
+--- test_files/150-original.txt	2025-03-07 19:06:27
++++ test_files/150-modified.txt	2025-03-07 19:06:27
+@@ -56,7 +56,7 @@
+         },
+     )
+     print("Message sent to Slack channel. Waiting for user response...")
+-    slack_listener.listen()
++    slack_listener.wait_forever()
+ 
+ # Listens to user response on Slack
+ @slack_listener.callback(filters={"trigger_name": "slackbot_receive_message"})
+\ No newline at end of file
+@@ -101,7 +101,7 @@
+ 
+     print("Creating agent for analyzing email...")
+     agent = FunctionCallingAgentWorker(
+-        tools=schedule_tool,  # Tools available for the agent to use
++        tools=schedule_tool,  # Tools available for the agent to use # type: ignore
+         llm=llm,  # Language model for processing requests
+         prefix_messages=prefix_messages,  # Initial system messages for context
+         max_function_calls=10,  # Maximum number of function calls allowed
+\ No newline at end of file
+@@ -160,4 +160,4 @@
+         print(f"Error in callback_gmail_message: {e}")
+ 
+ print("GMAIL LISTENING... Waiting for new messages.")
+-gmail_listener.listen()
+\ No newline at end of file
++gmail_listener.wait_forever()
+\ No newline at end of file
+```

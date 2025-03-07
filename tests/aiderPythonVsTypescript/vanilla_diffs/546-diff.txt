@@ -1,0 +1,33 @@
+```diff
+--- test_files/546-original.txt	2025-03-07 19:07:08
++++ test_files/546-modified.txt	2025-03-07 19:07:08
+@@ -1,7 +1,6 @@
+ ---
+ title: "Code Execution Agent"
+ sidebarTitle: "Code Execution Agent"
+-icon: "code"
+ description: "The project generates and executes code based on user-defined problems. It utilizes the Composio and connects your AI Agent to E2B's Code Interpreter to facilitate code execution, allowing users to input a problem statement and receive executable code as output. The agent is designed to operate in a sandbox environment, ensuring safe execution and accurate results. Key functionalities include code generation, execution, and result interpretation, making it an invaluable resource for developers and data scientists alike."
+ ---
+ 
+\ No newline at end of file
+@@ -37,7 +36,7 @@
+             apiKey: process.env.COMPOSIO_API_KEY
+         });
+ 
+-        const tools = await toolset.getActions({ 
++        const tools = await toolset.getTools({ 
+             actions: ["codeinterpreter_create_sandbox", "codeinterpreter_execute_code"] 
+         });
+         ```
+\ No newline at end of file
+@@ -140,7 +139,7 @@
+             apiKey: process.env.COMPOSIO_API_KEY
+         });
+ 
+-        const tools = await toolset.getActions({ 
++        const tools = await toolset.getTools({ 
+             actions: ["codeinterpreter_create_sandbox", "codeinterpreter_execute_code"] 
+         });
+ 
+\ No newline at end of file
+```

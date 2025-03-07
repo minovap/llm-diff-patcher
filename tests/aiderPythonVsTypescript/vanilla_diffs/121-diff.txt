@@ -1,0 +1,13 @@
+```diff
+--- test_files/121-original.txt	2025-03-07 19:06:23
++++ test_files/121-modified.txt	2025-03-07 19:06:23
+@@ -67,7 +67,7 @@
+     return (
+         f"{owner}/{name}",
+         read_user_input(
+-            prompt="Enter github issue ID or descrption or path to the file containing description",
++            prompt="Enter github issue ID or description or path to the file containing description",
+             metavar="github issue",
+             validator=_create_github_issue_validator(
+                 owner=owner,
+```

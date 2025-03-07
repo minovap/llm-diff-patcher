@@ -1,0 +1,25 @@
+```diff
+--- test_files/466-original.txt	2025-03-07 19:07:02
++++ test_files/466-modified.txt	2025-03-07 19:07:02
+@@ -6,12 +6,12 @@
+  * @param baseUrl - The base URL to be set in the configuration (optional).
+  */
+ export function setCliConfig(apiKey: string, baseUrl: string) {
+-    const userData = getUserDataJson();
+-    userData.api_key = apiKey;
+-    
+-    if (baseUrl) {
+-        userData.base_url = baseUrl;
+-    }
+-    
+-    saveFile(userDataPath(), userData);
++  const userData = getUserDataJson();
++  userData.api_key = apiKey;
++
++  if (baseUrl) {
++    userData.base_url = baseUrl;
++  }
++
++  saveFile(userDataPath(), JSON.stringify(userData));
+ }
+```

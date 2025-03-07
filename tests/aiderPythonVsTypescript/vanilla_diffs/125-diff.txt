@@ -1,0 +1,25 @@
+```diff
+--- test_files/125-original.txt	2025-03-07 19:06:23
++++ test_files/125-modified.txt	2025-03-07 19:06:23
+@@ -1,9 +1,10 @@
++# isort: skip_file
++
+ import re
+ import typing as t
+ from pathlib import Path
+ 
+ from agent import composio_toolset
+-
+ from composio import Action
+ 
+ 
+@@ -66,7 +67,7 @@
+     return (
+         f"{owner}/{name}",
+         read_user_input(
+-            prompt="Enter github issue ID or descrption or path to the file containing description",
++            prompt="Enter github issue ID or description or path to the file containing description",
+             metavar="github issue",
+             validator=_create_github_issue_validator(
+                 owner=owner,
+```

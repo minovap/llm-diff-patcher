@@ -1,0 +1,25 @@
+```diff
+--- test_files/030-original.txt	2025-03-07 19:06:14
++++ test_files/030-modified.txt	2025-03-07 19:06:14
+@@ -1,12 +1,18 @@
+-from composio_claude.toolset import ComposioToolset
++from composio import Action, App, Tag, Trigger, WorkspaceType, action
+ 
+-from composio.client.enums import Action, App, Tag, Trigger
++from composio_claude.toolset import ComposioToolSet
+ 
+ 
++ComposioToolset = ComposioToolSet
++
++
+ __all__ = (
+     "Action",
+     "App",
+     "Tag",
+     "Trigger",
++    "WorkspaceType",
++    "action",
+     "ComposioToolset",
++    "ComposioToolSet",
+ )
+```

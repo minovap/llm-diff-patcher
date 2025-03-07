@@ -1,0 +1,13 @@
+```diff
+--- test_files/347-original.txt	2025-03-07 19:06:48
++++ test_files/347-modified.txt	2025-03-07 19:06:48
+@@ -4,7 +4,7 @@
+ 
+ 
+ class Tool:
+-    """Asbtraction for local tools."""
++    """Abstraction for local tools."""
+ 
+     @property
+     def name(self) -> str:
+```

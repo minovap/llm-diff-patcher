@@ -1,0 +1,30 @@
+```diff
+--- test_files/449-original.txt	2025-03-07 19:07:00
++++ test_files/449-modified.txt	2025-03-07 19:07:00
+@@ -1,6 +1,7 @@
++/* eslint-disable no-console */
+ import chalk from "chalk";
+ import { Command } from "commander";
+-import { setCliConfig } from "../sdk/utils/config";
++import { setCliConfig } from "../sdk/utils/cli";
+ 
+ export default class LogoutCommand {
+   private program: Command;
+@@ -9,14 +10,14 @@
+     this.program = program;
+     this.program
+       .command("logout")
+-      .description("Logout from Composio")
++      .description("Clear authentication and logout from Composio")
+       .action(this.handleAction.bind(this));
+   }
+ 
+   private handleAction(): void {
+     setCliConfig("", "");
+     console.log(
+-      chalk.yellow("✨ You have been logged out from Composio! ✨\n"),
++      chalk.yellow("✨ You have been logged out from Composio! ✨\n")
+     );
+   }
+ }
+```

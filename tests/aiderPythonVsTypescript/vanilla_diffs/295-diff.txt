@@ -1,0 +1,13 @@
+```diff
+--- test_files/295-original.txt	2025-03-07 19:06:44
++++ test_files/295-modified.txt	2025-03-07 19:06:44
+@@ -16,7 +16,7 @@
+         ...,
+         description="Bash command to be executed.",
+     )
+-    session_id: str = Field(
++    session_id: t.Optional[str] = Field(
+         default=None,
+         description=(
+             "ID of the bash session where this command will be executed. "
+```

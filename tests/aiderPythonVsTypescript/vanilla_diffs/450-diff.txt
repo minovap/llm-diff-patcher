@@ -1,0 +1,13 @@
+```diff
+--- test_files/450-original.txt	2025-03-07 19:07:01
++++ test_files/450-modified.txt	2025-03-07 19:07:01
+@@ -8,7 +8,7 @@
+       acc[key] = value[index];
+       return acc;
+     },
+-    {} as Record<string, string | undefined>,
++    {} as Record<string, string | undefined>
+   );
+ }
+ 
+```

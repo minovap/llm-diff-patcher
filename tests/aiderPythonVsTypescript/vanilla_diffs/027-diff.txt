@@ -1,0 +1,72 @@
+```diff
+--- test_files/027-original.txt	2025-03-07 19:06:14
++++ test_files/027-modified.txt	2025-03-07 19:06:14
+@@ -3,6 +3,7 @@
+ """
+ 
+ import typing as t
++import warnings
+ 
+ import typing_extensions as te
+ from proto.marshal.collections.maps import MapComposite
+@@ -16,7 +17,9 @@
+ 
+ from composio import Action, ActionType, AppType, TagType
+ from composio.constants import DEFAULT_ENTITY_ID
++from composio.exceptions import InvalidEntityIdError
+ from composio.tools import ComposioToolSet as BaseComposioToolSet
++from composio.utils import help_msg
+ from composio.utils.shared import json_schema_to_model
+ 
+ 
+@@ -24,6 +27,7 @@
+     BaseComposioToolSet,
+     runtime="google_ai",
+     description_char_limit=1024,
++    action_name_char_limit=64,
+ ):
+     """
+     Composio toolset for Google AI Python Gemini framework.
+@@ -72,7 +76,7 @@
+             and entity_id != DEFAULT_ENTITY_ID
+             and self.entity_id != entity_id
+         ):
+-            raise ValueError(
++            raise InvalidEntityIdError(
+                 "separate `entity_id` can not be provided during "
+                 "initialization and handling tool calls"
+             )
+@@ -109,7 +113,7 @@
+             parameters=cleaned_parameters,
+         )
+ 
+-    @te.deprecated("Use `ComposioToolSet.get_tools` instead")
++    @te.deprecated("Use `ComposioToolSet.get_tools` instead.\n", category=None)
+     def get_actions(
+         self,
+         actions: t.Sequence[ActionType],
+@@ -123,6 +127,11 @@
+ 
+         :return: Composio tools wrapped as `FunctionDeclaration` objects
+         """
++        warnings.warn(
++            "Use `ComposioToolSet.get_tools` instead.\n" + help_msg(),
++            DeprecationWarning,
++            stacklevel=2,
++        )
+         return self.get_tool(actions=actions, entity_id=entity_id)
+ 
+     def get_tool(
+@@ -152,7 +161,10 @@
+                     ),
+                 )
+                 for tool in self.get_action_schemas(
+-                    actions=actions, apps=apps, tags=tags
++                    actions=actions,
++                    apps=apps,
++                    tags=tags,
++                    _populate_requested=True,
+                 )
+             ]
+         )
+```

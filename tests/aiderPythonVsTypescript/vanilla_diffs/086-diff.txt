@@ -1,0 +1,58 @@
+```diff
+--- test_files/086-original.txt	2025-03-07 19:06:19
++++ test_files/086-modified.txt	2025-03-07 19:06:19
+@@ -7,6 +7,8 @@
+ 
+ import pytest
+ 
++from composio.client.collections import Actions
++
+ from tests.test_cli.base import BaseCliTest
+ 
+ 
+@@ -16,13 +18,17 @@
+     @pytest.mark.parametrize(
+         argnames="arguments,exptected_outputs,unexptected_outputs",
+         argvalues=(
+-            (tuple(), ("strava_", "github_"), tuple()),  # List all apps
+-            (("--enabled",), ("github_",), ("strava_",)),  # List enabled apps
++            (tuple(), ("GMAIL_", "GITHUB_"), tuple()),  # List all apps
+             (
+-                ("--app", "slack"),
+-                ("slack_",),
+-                ("strava_", "github_"),
++                ("--app", "SLACK"),
++                ("SLACK_",),
++                ("GMAIL_", "GITHUB_"),
+             ),  # Filter by a specific app
++            (
++                ("--tag", "repos"),
++                ("GITHUB_",),
++                ("GMAIL_",),
++            ),  # Filter by a specific app
+         ),
+     )
+     @mock.patch("click.prompt", return_value="n")
+@@ -36,13 +42,20 @@
+         """Test list all actions."""
+         result = self.run("actions", *arguments)
+ 
+-        assert result.exit_code == 0
++        assert result.exit_code == 0, result.stderr
+         for output in exptected_outputs:
+             assert output in result.stdout
+ 
+         for output in unexptected_outputs:
+             assert output not in result.stdout
+ 
++    def test_tag_not_found(self) -> None:
++        """Test list all actions."""
++        with mock.patch.object(Actions, "get", return_value=[]):
++            self.run("actions", "--tag", "repo")
++        self.assert_exit_code(code=1)
++        self.assert_stderr("Could not find actions with following tags {'repo'}")
++
+     @pytest.mark.skip(reason="Limit filter is not working atm!")
+     @mock.patch("click.prompt", return_value="n")
+     def test_limit(self, patch: t.Any) -> None:  # pylint: disable=unused-argument
+```

@@ -1,0 +1,12 @@
+```diff
+--- test_files/451-original.txt	2025-03-07 19:07:01
++++ test_files/451-modified.txt	2025-03-07 19:07:01
+@@ -8,4 +8,6 @@
+   // actions list end here
+ };
+ 
+-export { APPS, ACTIONS };
++const COMPOSIO_VERSION = `0.5.0`;
++
++export { ACTIONS, APPS, COMPOSIO_VERSION };
+```

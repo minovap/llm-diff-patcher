@@ -1,0 +1,121 @@
+```diff
+--- test_files/561-original.txt	2025-03-07 19:07:09
++++ test_files/561-modified.txt	2025-03-07 19:07:09
+@@ -1,20 +1,13 @@
+ ---
+ title: "Newsletter Summarizer"
+ sidebarTitle: "Newsletter Summarizer"
+-icon: "book"
+ description: "This project serves as an example of how to use Composio to seamlessly fetch and summarize newsletter emails. It automatically retrieves recent newsletters, summarizes their content, and sends a well-formatted email to the specified recipient."
+ ---
+ 
+-
+-
+-
+ <Tabs>
+-
+     <Tab title="Javascript">
+     <Card color="#7bee0c" title="Newsletter Summarizer GitHub Repository" icon="github" href="https://github.com/ComposioHQ/composio/tree/master/js/examples/newsletter_summarizer/newsletter_summarizer_cloudflare">
+   Explore the complete source code for the Newsletter Summarizer project. This repository contains all the necessary files and scripts to set up and run the Newsletter Summarizer using Composio and Cloudflare.
+-  <CardBody>
+-  </CardBody>
+ </Card>
+     <Steps>
+         <Step title="Import base packages">
+@@ -48,13 +41,13 @@
+         ```javascript Define Webhook
+         app.get('/webhook', async (req, res) => {
+             try {
+-                const body = `Please research on Arxiv about \`${researchTopic}\`, organize 
+-                the top ${nIssues} results as ${nIssues} issues for 
+-                a GitHub repository, and finally raise those issues with proper 
+-                title, body, implementation guidance, and references in 
+-                the ${targetRepo} repo, as well as relevant tags and assignees as 
++                const body = `Please research on Arxiv about \`${researchTopic}\`, organize
++                the top ${nIssues} results as ${nIssues} issues for
++                a GitHub repository, and finally raise those issues with proper
++                title, body, implementation guidance, and references in
++                the ${targetRepo} repo, as well as relevant tags and assignees as
+                 the repo owner.`;
+-                
++
+                 const toolset = new OpenAIToolSet({
+                     apiKey: process.env.COMPOSIO_API_KEY,
+                 });
+@@ -80,7 +73,7 @@
+                     assistant_id: assistant.id,
+                 });
+                 run = await toolset.wait_and_handle_assistant_tool_calls(client, run, thread);
+-                
++
+                 // Check if the run is completed
+                 if (run.status === "completed") {
+                     let messages = await client.beta.threads.messages.list(thread.id);
+@@ -111,34 +104,11 @@
+         ```
+     </CodeGroup>
+     </Step>
++
+ </Steps>
+ </Tab>
+ </Tabs>
+ 
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+-
+ ## Putting It All Together
+ 
+ <CodeGroup>
+@@ -155,11 +125,11 @@
+     // Function to set up the GitHub connection for the user if it doesn't exist
+     async function setupUserConnectionIfNotExists(toolset, entityId, c) {
+         const entity = await toolset.client.getEntity(entityId);
+-        const connection = await entity.getConnection('github');
++        const connection = await entity.getConnection({ appName: "GITHUB" });
+ 
+         if (!connection) {
+             // If the user hasn't connected their GitHub account
+-            const connection = await entity.initiateConnection('github');
++            const connection = await entity.initiateConnection({appName: "GITHUB"});
+             console.log('Log in via: ', connection.redirectUrl);
+             c.json({ redirectUrl: connection.redirectUrl, message: 'Please log in to continue and then call this API again.' });
+         }
+@@ -178,7 +148,7 @@
+             const entity = await toolset.client.getEntity('default');
+             await setupUserConnectionIfNotExists(toolset, entity.id, c);
+             // Get the required tools for the AI task
+-            const tools = await toolset.getActions({ actions: ['gmail_fetch_emails', 'gmail_send_email'] }, entity.id);
++            const tools = await toolset.getTools({ actions: ['gmail_fetch_emails', 'gmail_send_email'] }, entity.id);
+             const instruction = `
+                 "Fetch the most recent newsletter emails from the inbox. "
+                 "Look for emails with subjects containing words like 'newsletter', 'update', or 'digest'. "
+@@ -232,6 +202,5 @@
+ 
+     export default app;
+     ```
+-</CodeGroup>
+ 
+-
++</CodeGroup>
+```

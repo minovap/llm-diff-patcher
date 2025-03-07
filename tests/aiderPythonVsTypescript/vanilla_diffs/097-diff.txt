@@ -1,0 +1,12 @@
+```diff
+--- test_files/097-original.txt	2025-03-07 19:06:20
++++ test_files/097-modified.txt	2025-03-07 19:06:20
+@@ -7,6 +7,7 @@
+ 
+ from pydantic import BaseModel, Field
+ from swebench import get_eval_refs
++
+ from swekit.benchmark.docker_utils.docker_file_generator.const import (
+     KEY_INSTANCE_ID,
+     KEY_MODEL,
+```

@@ -1,0 +1,13 @@
+```diff
+--- test_files/266-original.txt	2025-03-07 19:06:39
++++ test_files/266-modified.txt	2025-03-07 19:06:39
+@@ -13,7 +13,7 @@
+         alias="team_id",
+         description="Team ID (Workspace)",
+     )
+-    include_completed: bool = Field(
++    include_completed: t.Optional[bool] = Field(
+         default=None,
+         alias="include_completed",
+         description="",
+```

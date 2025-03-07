@@ -1,0 +1,27 @@
+```diff
+--- test_files/454-original.txt	2025-03-07 19:07:01
++++ test_files/454-modified.txt	2025-03-07 19:07:01
+@@ -10,12 +10,14 @@
+   "GOOGLE_SERVICE_ACCOUNT",
+   "NO_AUTH",
+   "BASIC_WITH_JWT",
++  "COMPOSIO_LINK",
+ ]);
+ 
+ export const ZCreateIntegrationParams = z.object({
+   name: z.string(),
+   authScheme: ZAuthMode.optional(),
+-  appId: z.string(),
++  appUniqueKey: z.string().optional(),
++  appId: z.string().optional(),
+   forceNewIntegration: z.boolean().optional(),
+   authConfig: z
+     .union([
+@@ -41,5 +43,6 @@
+   page: z.number().optional(),
+   pageSize: z.number().optional(),
+   appName: z.string().optional(),
++  appUniqueKey: z.string().optional(),
+   showDisabled: z.boolean().optional(),
+ });
+```

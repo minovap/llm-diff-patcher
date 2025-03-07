@@ -8,18 +8,23 @@ import * as path from 'path';
  */
 function runTest(testNumber: string, categoryPath?: string) {
   const testNum = testNumber.padStart(3, '0');
-  const originalFilePath = path.join(__dirname, `${testNum}-original.txt`);
-  const diffFilePath = path.join(__dirname, `${testNum}-diff.txt`);
-  
-  // Determine where to save the result
-  let resultFilePath: string;
+  let categoryDir: string;
+
+  // If category path not provided, use current directory
   if (categoryPath) {
-    // Save to category folder
-    resultFilePath = path.join(categoryPath, `${testNum}-result-ts.txt`);
+    categoryDir = categoryPath;
   } else {
-    // Save to script directory
-    resultFilePath = path.join(__dirname, `${testNum}-result-ts.txt`);
+    categoryDir = __dirname;
   }
+
+  // Define file paths - all files in the category directory
+  const originalFilePath = path.join(categoryDir, `${testNum}-original.txt`);
+  const diffFilePath = path.join(categoryDir, `${testNum}-diff.txt`);
+  const resultFilePath = path.join(categoryDir, `${testNum}-result-ts.txt`);
+
+  console.log(`Reading original file from: ${originalFilePath}`);
+  console.log(`Reading diff file from: ${diffFilePath}`);
+  console.log(`Will save result to: ${resultFilePath}`);
 
   // Read the original content
   const originalContent = fs.readFileSync(originalFilePath, 'utf8');
@@ -27,13 +32,9 @@ function runTest(testNumber: string, categoryPath?: string) {
   // Read the diff content
   const diffContent = fs.readFileSync(diffFilePath, 'utf8');
 
-  // Find diffs from the markdown-style diff content  
+  // Find diffs from the markdown-style diff content
   const edits = findDiffs(diffContent);
-  
-  if (edits.length === 0) {
-    console.error(`No valid diffs found for test ${testNum}`);
-    process.exit(1);
-  }
+  console.log(`Found ${edits.length} edits in diff file`);
   
   // Get the first hunk from the edits
   const [_filename, hunk] = edits[0];
@@ -48,7 +49,6 @@ function runTest(testNumber: string, categoryPath?: string) {
   
   // Save the result
   fs.writeFileSync(resultFilePath, modifiedContent);
-  
   console.log(`TypeScript test ${testNum} completed successfully`);
   console.log(`Result saved to: ${resultFilePath}`);
 }

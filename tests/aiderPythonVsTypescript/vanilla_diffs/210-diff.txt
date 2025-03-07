@@ -1,0 +1,29 @@
+```diff
+--- test_files/210-original.txt	2025-03-07 19:06:34
++++ test_files/210-modified.txt	2025-03-07 19:06:34
+@@ -1,17 +1,15 @@
+ import typing as t
+ 
+-from composio.tools.local.base import Action, Tool
++from composio.tools.base.local import LocalAction, LocalTool
+ 
+ from .actions import CodeQuery
+ 
+ 
+-class Greptile(Tool):
+-    """
+-    Code understanding tool. Index Code and answer questions about it.
+-    """
++class Greptile(LocalTool, autoload=True):
++    """Code understanding tool. Index Code and answer questions about it."""
+ 
+-    def actions(self) -> list[t.Type[Action]]:
+-        return [CodeQuery]
++    logo = "https://raw.githubusercontent.com/ComposioHQ/composio/master/python/docs/imgs/logos/greptile.png"
+ 
+-    def triggers(self) -> list:
+-        return []
++    @classmethod
++    def actions(cls) -> list[t.Type[LocalAction]]:
++        return [CodeQuery]
+```

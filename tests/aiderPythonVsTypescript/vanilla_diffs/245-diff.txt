@@ -1,0 +1,13 @@
+```diff
+--- test_files/245-original.txt	2025-03-07 19:06:36
++++ test_files/245-modified.txt	2025-03-07 19:06:36
+@@ -38,7 +38,7 @@
+ 
+ class UpdateComment(OpenAPIAction):
+     """
+-    Replace the content of a task commment, assign a comment, and mark a comment
++    Replace the content of a task comment, assign a comment, and mark a comment
+     as resolved.
+     """
+ 
+```

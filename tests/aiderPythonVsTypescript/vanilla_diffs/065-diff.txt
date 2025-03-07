@@ -1,0 +1,26 @@
+```diff
+--- test_files/065-original.txt	2025-03-07 19:06:17
++++ test_files/065-modified.txt	2025-03-07 19:06:17
+@@ -1,10 +1,11 @@
+ from datetime import datetime
+ 
+ import dotenv
+-from composio_openai import Action, ComposioToolSet
+ from openai import OpenAI
+ 
++from composio_openai import Action, ComposioToolSet
+ 
++
+ # Load environment variables from .env
+ dotenv.load_dotenv()
+ 
+@@ -51,7 +52,7 @@
+     content=my_task,
+ )
+ 
+-# Execute Agent with intergrations
++# Execute Agent with integrations
+ run = openai_client.beta.threads.runs.create(
+     thread_id=thread.id,
+     assistant_id=assistant.id,
+```

@@ -1,0 +1,20 @@
+```diff
+--- test_files/055-original.txt	2025-03-07 19:06:16
++++ test_files/055-modified.txt	2025-03-07 19:06:16
+@@ -1,6 +1,6 @@
+ from composio_julep.toolset import ComposioToolSet
+ 
+-from composio.client.enums import Action, App, Tag, Trigger
++from composio import Action, App, Tag, Trigger, WorkspaceType, action
+ 
+ 
+ __all__ = (
+@@ -8,5 +8,7 @@
+     "App",
+     "Tag",
+     "Trigger",
++    "WorkspaceType",
++    "action",
+     "ComposioToolSet",
+ )
+```

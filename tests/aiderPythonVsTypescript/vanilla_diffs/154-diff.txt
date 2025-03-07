@@ -1,0 +1,97 @@
+```diff
+--- test_files/154-original.txt	2025-03-07 19:06:27
++++ test_files/154-modified.txt	2025-03-07 19:06:27
+@@ -11,9 +11,13 @@
+ from composio_langgraph import Action, ComposioToolSet
+ from composio.client.collections import TriggerEventData
+ 
+-# Setup
++from datetime import datetime
++from typing import Optional, Any
+ load_dotenv()
+ 
++DATE_TIME: str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
++TIMEZONE: Optional[Any] = datetime.now().astimezone().tzinfo
++
+ # Constants
+ SCHEDULER_AGENT_NAME = "Scheduler"
+ TOOL_NODE_NAME = "ToolNode"
+\ No newline at end of file
+@@ -23,13 +27,13 @@
+ llm = ChatOpenAI(model="gpt-4-turbo")
+ composio_toolset = ComposioToolSet()
+ 
+-schedule_tools = composio_toolset.get_actions(
++schedule_tools = composio_toolset.get_tools(
+     actions=[
+         Action.GOOGLECALENDAR_FIND_FREE_SLOTS,
+         Action.GOOGLECALENDAR_CREATE_EVENT,
+     ]
+ )
+-email_tools = composio_toolset.get_actions(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
++email_tools = composio_toolset.get_tools(actions=[Action.GMAIL_CREATE_EMAIL_DRAFT])
+ tools = [*schedule_tools, *email_tools]
+ 
+ tool_node = ToolNode(tools)
+\ No newline at end of file
+@@ -78,10 +82,9 @@
+       - Any other relevant details or instructions for the participants
+ 
+ Remember:
+-- The current date and time is {DATE_TIME}.
++- The current date and time is {DATE_TIME} and timezone is {TIMEZONE}.
+ - All conversations and scheduling occur in the IST timezone.
+ - Be courteous and professional in all communications.
+-- If you encounter any errors when making function calls, try passing an empty config ({{"config": {{}}}}).
+ - Always provide a FINAL ANSWER when you've completed all necessary tasks.
+ 
+ Your goal is to efficiently manage scheduling and communication, ensuring a smooth experience for all parties involved.
+\ No newline at end of file
+@@ -120,21 +123,12 @@
+     {
+         "continue": SCHEDULER_AGENT_NAME,
+         "call_tool": TOOL_NODE_NAME,
++        "__end__": "__end__",
+     },
+ )
+ 
+ app = workflow.compile()
+ 
+-def extract_sender_email(payload):
+-    if not any(header.get("name") == "Delivered-To" and header.get("value") for header in payload["headers"]):
+-        return None
+-
+-    for header in payload["headers"]:
+-        if header["name"] == "From":
+-            match = re.search(r"[\w\.-]+@[\w\.-]+", header["value"])
+-            return match.group(0) if match else None
+-    return None
+-
+ def process_email(email_sender, email_content, thread_id):
+     final_state = app.invoke({
+         "messages": [
+\ No newline at end of file
+@@ -154,9 +148,10 @@
+ @listener.callback(filters={"trigger_name": "gmail_new_gmail_message"})
+ def callback_new_message(event: TriggerEventData) -> None:
+     payload = event.payload
++    print(payload)
+     thread_id = payload.get("threadId")
+-    email_content = payload.get("snippet")
+-    email_sender = extract_sender_email(payload["payload"])
++    email_content = payload.get("messageText")
++    email_sender = payload["sender"]
+ 
+     if email_sender is None:
+         print("No sender email found")
+\ No newline at end of file
+@@ -166,4 +161,5 @@
+     output = process_email(email_sender, email_content, thread_id)
+     print("Final output:", output)
+ 
+-listener.listen()
+\ No newline at end of file
++print("Starting listener")
++listener.wait_forever()
+\ No newline at end of file
+```

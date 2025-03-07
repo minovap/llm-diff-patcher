@@ -1,0 +1,12 @@
+```diff
+--- test_files/355-original.txt	2025-03-07 19:06:49
++++ test_files/355-modified.txt	2025-03-07 19:06:49
+@@ -5,3 +5,7 @@
+ STDERR = "stderr"
+ 
+ ECHO_EXIT_CODE = "echo $?"
++DEFAULT_IMAGE = "composio/composio"
++
++ENV_COMPOSIO_DEV_MODE = "COMPOSIO_DEV_MODE"
++ENV_COMPOSIO_TOOLSERVER_IMAGE = "COMPOSIO_TOOLSERVER_IMAGE"
+```

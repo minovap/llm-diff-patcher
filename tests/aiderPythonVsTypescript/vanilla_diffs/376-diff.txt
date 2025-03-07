@@ -1,0 +1,13 @@
+```diff
+--- test_files/376-original.txt	2025-03-07 19:06:51
++++ test_files/376-modified.txt	2025-03-07 19:06:51
+@@ -2,7 +2,7 @@
+ 
+ 
+ def get_enum_key(name: str) -> str:
+-    characters_to_replace = [" ", "-", "/", "(", ")", "\\", ":", '"', "'", "."]
++    characters_to_replace = [" ", "-", "/", "(", ")", "\\", ":", '"', "'", ".", "&"]
+     for char in characters_to_replace:
+         name = name.replace(char, "_")
+     return name.upper()
+```

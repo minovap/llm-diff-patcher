@@ -1,0 +1,26 @@
+```diff
+--- test_files/064-original.txt	2025-03-07 19:06:17
++++ test_files/064-modified.txt	2025-03-07 19:06:17
+@@ -3,10 +3,11 @@
+ """
+ 
+ import dotenv
+-from composio_openai import App, ComposioToolSet
+ from openai import OpenAI
+ 
++from composio_openai import App, ComposioToolSet
+ 
++
+ # Load environment variables from .env
+ dotenv.load_dotenv()
+ 
+@@ -15,7 +16,7 @@
+ composio_toolset = ComposioToolSet()
+ 
+ # Define task.
+-task = "Star a repo SamparkAI/composio_sdk on GitHub"
++task = "Star a repo composiohq/composio on GitHub"
+ 
+ # Get GitHub tools that are pre-configured
+ tools = composio_toolset.get_tools(apps=[App.GITHUB])
+```

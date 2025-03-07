@@ -1,0 +1,28 @@
+```diff
+--- test_files/404-original.txt	2025-03-07 19:06:53
++++ test_files/404-modified.txt	2025-03-07 19:06:53
+@@ -3,10 +3,10 @@
+ import typing as t
+ 
+ from . import base
+-from ._action import Action
+-from ._app import App
+-from ._tag import Tag
+-from ._trigger import Trigger
++from .action import Action
++from .app import App
++from .tag import Tag
++from .trigger import Trigger
+ 
+ 
+ TagType = t.Union[str, Tag]
+@@ -15,7 +15,7 @@
+ AppType = t.Union[str, App]
+ "Type placeholder for `App`"
+ 
+-ActionType = t.Union[str, Action]
++ActionType = t.Union[str, Action, t.Type[base.SentinalObject]]
+ "Type placeholder for `Action`"
+ 
+ TriggerType = t.Union[str, Trigger]
+```

@@ -1,0 +1,12 @@
+```diff
+--- test_files/105-original.txt	2025-03-07 19:06:21
++++ test_files/105-modified.txt	2025-03-07 19:06:21
+@@ -10,6 +10,7 @@
+ import typing_extensions as te
+ from click.globals import get_current_context as get_click_context
+ from rich.console import Console
++
+ from swekit.config.constants import (
+     ISSUE_CONFIG_PATH,
+     KEY_API_KEY,
+```

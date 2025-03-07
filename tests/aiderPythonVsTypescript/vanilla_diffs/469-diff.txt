@@ -1,0 +1,25 @@
+```diff
+--- test_files/469-original.txt	2025-03-07 19:07:02
++++ test_files/469-modified.txt	2025-03-07 19:07:02
+@@ -6,11 +6,13 @@
+     Warning: Can cause problems if there are multiple instances of the SDK running in the same process.
+ */
+ class ComposioSDKContext {
+-    static apiKey: string;
+-    static baseURL: string; 
+-    static frameworkRuntime?: string;
+-    static source?: string = "javascript";
+-    static composioVersion?: string;
++  static apiKey: string;
++  static baseURL: string;
++  static frameworkRuntime?: string;
++  static source?: string = "javascript";
++  static composioVersion?: string;
++  static sessionId?: string;
++  static allowTracing?: boolean;
+ }
+ 
+-export default ComposioSDKContext;
+\ No newline at end of file
++export default ComposioSDKContext;
+```

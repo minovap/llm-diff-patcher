@@ -1,0 +1,12 @@
+```diff
+--- test_files/021-original.txt	2025-03-07 19:06:14
++++ test_files/021-modified.txt	2025-03-07 19:06:14
+@@ -11,6 +11,6 @@
+     actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER],
+ )
+ # Create agent with Composio tools
+-agent = CodeAgent(tools=tools, model=HfApiModel())# type: ignore[import-untyped]
++agent = CodeAgent(tools=tools, model=HfApiModel())  # type: ignore[import-untyped]
+ 
+ agent.run("Star the composiohq/composio repo")
+```

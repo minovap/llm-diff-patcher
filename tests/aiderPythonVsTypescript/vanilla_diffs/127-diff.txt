@@ -1,0 +1,33 @@
+```diff
+--- test_files/127-original.txt	2025-03-07 19:06:23
++++ test_files/127-modified.txt	2025-03-07 19:06:23
+@@ -1,6 +1,8 @@
+-from agent import composio_toolset, crew
++# isort: skip_file
++
+ from inputs import from_github
+ 
++from agent import composio_toolset, crew
+ from composio import Action
+ 
+ 
+@@ -14,13 +16,13 @@
+         }
+     )
+     response = composio_toolset.execute_action(
+-        action=Action.GITCMDTOOL_GET_PATCH_CMD,
++        action=Action.FILETOOL_GIT_PATCH,
+         params={},
+     )
+-    if response.get("stderr") and len(response["stderr"]) > 0:
+-        print("Error:", response["stderr"])
+-    elif response.get("stdout"):
+-        print("=== Generated Patch ===\n" + response["stdout"])
++    if response.get("error") and len(response["error"]) > 0:
++        print("Error:", response["error"])
++    elif response.get("patch"):
++        print("=== Generated Patch ===\n" + response["patch"])
+     else:
+         print("No output available")
+ 
+```

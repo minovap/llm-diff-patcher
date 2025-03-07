@@ -1,0 +1,41 @@
+```diff
+--- test_files/036-original.txt	2025-03-07 19:06:15
++++ test_files/036-modified.txt	2025-03-07 19:06:15
+@@ -1,13 +1,14 @@
+ # pylint: disable=E0611
+-from composio_praisonai import Action, ComposioToolSet
+ from praisonai import PraisonAI
+ 
++from composio_praisonai import Action, ComposioToolSet
+ 
++
+ # pylint: enable=E0611
+ 
+ composio_toolset = ComposioToolSet()
+ tools = composio_toolset.get_actions(
+-    actions=[Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER]
++    actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+ )
+ 
+ tool_section_str = composio_toolset.get_tools_section(tools)
+@@ -17,7 +18,7 @@
+ agent_yaml = (
+     """
+ framework: "crewai"
+-topic: "Github Mangement"
++topic: "Github Management"
+ 
+ roles:
+   developer:
+@@ -26,8 +27,8 @@
+     backstory: "A developer exploring new codebases and have certain tools available to execute different tasks."
+     tasks:
+       star_github:
+-        description: "Star a repo ComposioHQ/composio on GitHub"
+-        expected_output: "Response wheather the task was executed."
++        description: "Star a repo composiohq/composio on GitHub"
++        expected_output: "Response whether the task was executed."
+ """
+     + tool_section_str
+ )
+```

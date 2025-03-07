@@ -1,0 +1,28 @@
+```diff
+--- test_files/012-original.txt	2025-03-07 19:06:13
++++ test_files/012-modified.txt	2025-03-07 19:06:13
+@@ -9,10 +9,10 @@
+ 
+ setup(
+     name="composio_langgraph",
+-    version="0.3.20",
++    version="0.7.6",
+     author="Sawradip",
+     author_email="sawradip@composio.dev",
+-    description="Use Composio to get array of tools with LnagGraph Agent Workflows",
++    description="Use Composio to get array of tools with LangGraph Agent Workflows",
+     long_description=(Path(__file__).parent / "README.md").read_text(encoding="utf-8"),
+     long_description_content_type="text/markdown",
+     url="https://github.com/ComposioHQ/composio",
+@@ -23,8 +23,8 @@
+     ],
+     python_requires=">=3.9,<4",
+     install_requires=[
+-        "langchain_core>=0.2.17",
+-        "composio_langchain==0.3.20",
++        "composio_langchain>=0.5.0,<0.8.0",
++        "langgraph<0.3.0",
+     ],
+     include_package_data=True,
+ )
+```

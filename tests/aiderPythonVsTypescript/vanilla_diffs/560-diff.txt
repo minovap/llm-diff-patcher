@@ -1,0 +1,12 @@
+```diff
+--- test_files/560-original.txt	2025-03-07 19:07:09
++++ test_files/560-modified.txt	2025-03-07 19:07:09
+@@ -1,7 +1,6 @@
+ ---
+ title: "SQL Agent"
+ sidebarTitle: "SQL Agent"
+-icon: "database"
+ description: "This guide provides detailed steps to create an agent that leverages 
+ Composio to perform SQL queries and file operations."
+ ---
+```

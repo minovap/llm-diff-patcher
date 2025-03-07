@@ -1,0 +1,24 @@
+```diff
+--- test_files/468-original.txt	2025-03-07 19:07:02
++++ test_files/468-modified.txt	2025-03-07 19:07:02
+@@ -1,9 +1,9 @@
+-export const isNewerVersion  = (v1: string, v2: string): boolean => {
+-    const parts1 = v1.split('.').map(Number);
+-    const parts2 = v2.split('.').map(Number);
+-    for (let i = 0; i < 3; i++) {
+-        if (parts1[i] > parts2[i]) return true;
+-        if (parts1[i] < parts2[i]) return false;
+-    }
+-    return false;
+-}
+\ No newline at end of file
++export const isNewerVersion = (v1: string, v2: string): boolean => {
++  const parts1 = v1.split(".").map(Number);
++  const parts2 = v2.split(".").map(Number);
++  for (let i = 0; i < 3; i++) {
++    if (parts1[i] > parts2[i]) return true;
++    if (parts1[i] < parts2[i]) return false;
++  }
++  return false;
++};
+```

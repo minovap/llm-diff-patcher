@@ -1,0 +1,34 @@
+```diff
+--- test_files/456-original.txt	2025-03-07 19:07:01
++++ test_files/456-modified.txt	2025-03-07 19:07:01
+@@ -5,6 +5,7 @@
+ 
+ export const ZListConnectionsData = z.object({
+   appNames: z.string().optional(),
++  appUniqueKeys: z.string().array().optional(),
+   connectionId: z.string().optional(),
+   entityId: z.string().optional(),
+   integrationId: z.string().optional(),
+@@ -18,9 +19,9 @@
+ });
+ 
+ export const ZInitiateConnectionDataReq = z.object({
+-  data: z.record(z.string(), z.unknown()).optional(),
++  connectionParams: z.record(z.string(), z.unknown()).optional(),
+   entityId: z.string().optional(),
+-  labels: z.string().array().optional(),
++  labels: z.array(z.string()).optional(),
+   integrationId: z.string().optional(),
+   redirectUri: z.string().optional(),
+   authMode: ZAuthMode.optional(),
+@@ -50,3 +51,9 @@
+   entityId: z.string().optional(),
+   labels: z.string().array().optional(),
+ });
++
++export const ZReinitiateConnectionPayloadDto = z.object({
++  connectedAccountId: z.string(),
++  data: z.record(z.string(), z.unknown()),
++  redirectUri: z.string().optional(),
++});
+```

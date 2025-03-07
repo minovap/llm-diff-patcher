@@ -1,0 +1,11 @@
+```diff
+--- test_files/368-original.txt	2025-03-07 19:06:50
++++ test_files/368-modified.txt	2025-03-07 19:06:50
+@@ -1,6 +1,5 @@
+ """Tool exceptions."""
+ 
+-
+ from composio.exceptions import ComposioSDKError
+ 
+ 
+```

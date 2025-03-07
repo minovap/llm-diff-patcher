@@ -1,0 +1,37 @@
+```diff
+--- test_files/522-original.txt	2025-03-07 19:07:06
++++ test_files/522-modified.txt	2025-03-07 19:07:06
+@@ -1,7 +1,6 @@
+ ---
+ title: "AI Scheduling Agent"
+ sidebarTitle: "AI Scheduler"
+-icon: "calendar"
+ description: "This project demonstrates how to use Composio to create a scheduling agent."
+ ---
+ 
+@@ -261,7 +260,7 @@
+ 
+ <Step title="Subscribing to the trigger, configuring the agent">
+ ```javascript setup the ai agent
+-await toolset.client.triggers.subscribe(async (data) => {
++await toolset.triggers.subscribe(async (data) => {
+     console.log("trigger received", data);
+     const payload = data.payload;
+     const message = payload.messageText;
+@@ -311,7 +310,7 @@
+ });
+ 
+ // Subscribe to triggers and perform actions
+-await toolset.client.triggers.subscribe(async (data) => {
++await toolset.triggers.subscribe(async (data) => {
+     console.log("trigger received", data);
+     const payload = data.payload;
+     const message = payload.messageText;
+@@ -349,4 +348,4 @@
+ </Step>
+ </Steps>
+ </Tab>
+-</Tabs>
+\ No newline at end of file
++</Tabs>
+```

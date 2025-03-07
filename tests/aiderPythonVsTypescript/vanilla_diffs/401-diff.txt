@@ -1,0 +1,44 @@
+```diff
+--- test_files/401-original.txt	2025-03-07 19:06:53
++++ test_files/401-modified.txt	2025-03-07 19:06:53
+@@ -3,6 +3,7 @@
+ """
+ 
+ import json
++import logging
+ import typing as t
+ from pathlib import Path
+ 
+@@ -10,6 +11,9 @@
+ from pydantic import BaseModel
+ 
+ 
++logger = logging.getLogger(__name__)
++
++
+ class LocalStorage(BaseModel):
+     """
+     Local storage object.
+@@ -32,7 +36,7 @@
+     ```
+ 
+     Note:
+-        When derriving from the `LocalStorage` class, `path` needs to be
++        When deriving from the `LocalStorage` class, `path` needs to be
+         defined as a class variable.
+     """
+ 
+@@ -54,10 +58,12 @@
+                 f"Value of `path` is not set for `{self.__class__.__name__}`"
+             )
+ 
++        self.path.parent.mkdir(parents=True, exist_ok=True)
+         data = self.to_json()
+         if "path" in data:
+             del data["path"]
+ 
++        logger.debug("Storing %s to %s", self.__class__.__name__, self.path)
+         self.path.write_text(
+             json.dumps(
+                 data,
+```

@@ -1,0 +1,65 @@
+```diff
+--- test_files/319-original.txt	2025-03-07 19:06:46
++++ test_files/319-modified.txt	2025-03-07 19:06:46
+@@ -1,8 +1,13 @@
++from typing import Dict
++
+ from pydantic import BaseModel, Field
+ 
+-from composio.tools.local.base import Action
++from composio.tools.base.local import LocalAction
+ 
+ 
++# pylint: disable=import-outside-toplevel
++
++
+ class CrawlToolRequest(BaseModel):
+     url: str = Field(..., description="Mandatory website url to read the file")
+ 
+@@ -11,36 +16,30 @@
+     content: str = Field(..., description="The content of the selected element")
+ 
+ 
+-class Crawl(Action[CrawlToolRequest, CrawlToolResponse]):
++class Crawl(LocalAction[CrawlToolRequest, CrawlToolResponse]):
+     """
+     Crawl a website
+     """
+ 
+-    _display_name = "Crawl a website"
+-    _request_schema = CrawlToolRequest
+-    _response_schema = CrawlToolResponse
+-    _tags = ["Web"]
+-    _tool_name = "spidertool"
++    _tags = ["web", "scrape"]
+ 
+-    def execute(self, request: CrawlToolRequest, authorisation_data: dict) -> dict:
++    def execute(self, request: CrawlToolRequest, metadata: Dict) -> CrawlToolResponse:
+         """Crawl a website and return its content in markdown format"""
+-        url = request.url
+         try:
+-            # pylint: disable=import-outside-toplevel
+             from spider import Spider
+             from spider.spider_types import RequestParamsDict
+ 
+-            # pylint: enable=import-outside-toplevel
+         except ImportError as e:
+             raise ImportError("Failed to import Spider:", e) from e
++
+         try:
+             spider = Spider()
+             params = RequestParamsDict(return_format="markdown")
+-            response = spider.crawl_url(url, params)
++            response = spider.crawl_url(request.url, params)
+             if response is None:
+-                return {"error": "Response is None"}
+-            return {"content": response.content}
++                raise ValueError(f"Error getting response for url {request.url}")
++            return CrawlToolResponse(content=response.content)
+         except (ConnectionError, TimeoutError) as e:
+-            return {"error": f"Connection or timeout error occurred: {e}"}
++            raise ValueError(f"Connection or timeout error occurred: {e}") from e
+         except Exception as e:
+-            return {"error": f"An unexpected error occurred: {e}"}
++            raise ValueError(f"An unexpected error occurred: {e}") from e
+```

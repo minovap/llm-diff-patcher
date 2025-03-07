@@ -1,0 +1,20 @@
+```diff
+--- test_files/074-original.txt	2025-03-07 19:06:18
++++ test_files/074-modified.txt	2025-03-07 19:06:18
+@@ -21,6 +21,8 @@
+ 
+ 
+ class SomeTool(LocalTool, autoload=True):
++    logo = ""
++
+     @classmethod
+     def actions(cls) -> List[type[LocalAction]]:
+         return [SomeAction]
+@@ -48,5 +50,5 @@
+             },
+         )
+ 
+-        assert not response["successfull"]
++        assert not response["successful"]
+         assert "Following fields are missing: {'name'}" in response["error"]
+```

@@ -1,0 +1,15 @@
+```diff
+--- test_files/023-original.txt	2025-03-07 19:06:14
++++ test_files/023-modified.txt	2025-03-07 19:06:14
+@@ -121,6 +121,10 @@
+         )
+         # Flatten and format the parameters structure
+         params = schema_params["properties"]
++        required_params = schema_params.get("required", [])
++        for param_name, param_info in params.items():
++            if param_name not in required_params:
++                param_info["nullable"] = True
+         tool = StructuredTool(
+             name=action,
+             description=description,
+```

@@ -1,0 +1,31 @@
+```diff
+--- test_files/005-original.txt	2025-03-07 19:06:12
++++ test_files/005-modified.txt	2025-03-07 19:06:12
+@@ -10,14 +10,14 @@
+ # Load environment variables from .env
+ dotenv.load_dotenv()
+ 
+-llm = OpenAI(model="gpt-4o")
++llm = OpenAI(model="gpt-4-turbo")
+ 
+ 
+ def main():
+     # Get All the tools
+     composio_toolset = ComposioToolSet()
+     tools = composio_toolset.get_actions(
+-        actions=[Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER]
++        actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+     )
+ 
+     prefix_messages = [
+@@ -38,8 +38,7 @@
+         verbose=True,
+     ).as_agent()
+ 
+-    response = agent.chat("Hello! I would like to star a repo SamparkAI/docs on GitHub")
+-    print("Response:", response)
++    agent.chat("Hello! I would like to star a repo composiohq/composio on GitHub")
+ 
+ 
+ if __name__ == "__main__":
+```

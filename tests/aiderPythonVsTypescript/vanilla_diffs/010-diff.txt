@@ -1,0 +1,64 @@
+```diff
+--- test_files/010-original.txt	2025-03-07 19:06:13
++++ test_files/010-modified.txt	2025-03-07 19:06:13
+@@ -1,12 +1,12 @@
+-import typing as t
+-
+ from composio_langchain import ComposioToolSet as BaseComposioToolSet
+ 
+-from composio.constants import DEFAULT_ENTITY_ID
+-from composio.tools.env.factory import ExecEnv
+ 
+-
+-class ComposioToolSet(BaseComposioToolSet):
++class ComposioToolSet(
++    BaseComposioToolSet,
++    runtime="langgraph",
++    description_char_limit=1024,
++    action_name_char_limit=64,
++):
+     """
+     Composio toolset for LangGraph framework.
+ 
+@@ -26,7 +26,7 @@
+ 
+     composio_toolset = ComposioToolSet()
+     tools = composio_toolset.get_actions(
+-        actions=[Action.GITHUB_ACTIVITY_STAR_REPO_FOR_AUTHENTICATED_USER]
++        actions=[Action.GITHUB_STAR_A_REPOSITORY_FOR_THE_AUTHENTICATED_USER]
+     )
+     tool_executor = ToolExecutor(tools)
+     functions = [convert_to_openai_function(t) for t in tools]
+@@ -94,31 +94,3 @@
+     app = workflow.compile()
+     ```
+     """
+-
+-    def __init__(
+-        self,
+-        api_key: t.Optional[str] = None,
+-        base_url: t.Optional[str] = None,
+-        entity_id: str = DEFAULT_ENTITY_ID,
+-        output_in_file: bool = False,
+-        workspace_env: ExecEnv = ExecEnv.HOST,
+-        workspace_id: t.Optional[str] = None,
+-    ) -> None:
+-        """
+-        Initialize composio toolset.
+-
+-        :param api_key: Composio API key
+-        :param base_url: Base URL for the Composio API server
+-        :param entity_id: Entity ID for making function calls
+-        :param output_in_file: Whether to write output to a file
+-        """
+-        super().__init__(
+-            api_key=api_key,
+-            base_url=base_url,
+-            entity_id=entity_id,
+-            output_in_file=output_in_file,
+-            workspace_env=workspace_env,
+-            workspace_id=workspace_id,
+-        )
+-
+-        self._runtime = "langgraph"
+```

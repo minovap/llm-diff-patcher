@@ -1,0 +1,13 @@
+```diff
+--- test_files/162-original.txt	2025-03-07 19:06:28
++++ test_files/162-modified.txt	2025-03-07 19:06:28
+@@ -46,7 +46,7 @@
+ 
+ # Register tools with the ComposioToolSet, specifying the caller (chatbot) and executor (user_proxy)
+ composio_toolset.register_tools(
+-    tools=[App.EMBEDTOOL],  # Tools to be registered
++    apps=[App.EMBED_TOOL],  # Tools to be registered
+     caller=chatbot,  # The chatbot that calls the tools
+     executor=user_proxy,  # The user proxy that executes the tools
+ )
+```

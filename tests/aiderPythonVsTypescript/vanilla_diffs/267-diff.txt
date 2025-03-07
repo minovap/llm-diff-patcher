@@ -1,0 +1,19 @@
+```diff
+--- test_files/267-original.txt	2025-03-07 19:06:39
++++ test_files/267-modified.txt	2025-03-07 19:06:39
+@@ -13,12 +13,12 @@
+         alias="view_id",
+         description="105 (string)",
+     )
+-    start: int = Field(
++    start: t.Optional[int] = Field(
+         default=None,
+         alias="start",
+         description="Enter the `date` of a Chat view comment using Unix time in milliseconds.",
+     )
+-    start_id: str = Field(
++    start_id: t.Optional[str] = Field(
+         default=None,
+         alias="start_id",
+         description="Enter the Comment `id` of a Chat view comment.",
+```

@@ -1,0 +1,31 @@
+```diff
+--- test_files/258-original.txt	2025-03-07 19:06:38
++++ test_files/258-modified.txt	2025-03-07 19:06:38
+@@ -18,7 +18,7 @@
+         alias="guest_id",
+         description="",
+     )
+-    include_shared: bool = Field(
++    include_shared: t.Optional[bool] = Field(
+         default=None,
+         alias="include_shared",
+         description=(
+@@ -26,7 +26,7 @@
+             "to `false`. By default this parameter is set to `true`. "
+         ),
+     )
+-    custom_task_ids: bool = Field(
++    custom_task_ids: t.Optional[bool] = Field(
+         default=None,
+         alias="custom_task_ids",
+         description=(
+@@ -34,7 +34,7 @@
+             "be `true`. "
+         ),
+     )
+-    team_id: int = Field(
++    team_id: t.Optional[int] = Field(
+         default=None,
+         alias="team_id",
+         description=(
+```

@@ -1,0 +1,13 @@
+```diff
+--- test_files/014-original.txt	2025-03-07 19:06:13
++++ test_files/014-modified.txt	2025-03-07 19:06:13
+@@ -9,7 +9,7 @@
+ 
+ setup(
+     name="composio_gemini",
+-    version="0.7.1",
++    version="0.7.6",
+     author="Composio",
+     author_email="tech@composio.dev",
+     description="Use Composio to get an array of tools with your Gemini agent.",
+```

@@ -1,0 +1,49 @@
+```diff
+--- test_files/180-original.txt	2025-03-07 19:06:30
++++ test_files/180-modified.txt	2025-03-07 19:06:30
+@@ -14,7 +14,7 @@
+ GOOGLE_SHEET_ID = '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms'
+ 
+ # Initialize the toolset for GitHub
+-composio_toolset = ComposioToolSet(output_dir=Path(os.path.dirname(os.path.realpath(__file__))))
++composio_toolset = ComposioToolSet()
+ tools = composio_toolset.get_tools(
+     apps=[
+         App.GOOGLESHEETS,
+@@ -33,7 +33,7 @@
+ def should_continue(state: MessagesState) -> Literal["tools", "__end__"]:
+     messages = state["messages"]
+     last_message = messages[-1]
+-    if last_message.tool_calls:
++    if last_message.tool_calls: # type: ignore
+         return "tools"
+     return "__end__"
+ 
+@@ -65,6 +65,26 @@
+     that makes it look good. The graphs in it should be factual. 
+     Try to have a few charts and few table with top data points.
+     NOTE: Mostly the user passes small sheets, so try to read the whole sheet at once and not via ranges.
++
++    You can test the code to verify installation :
++
++from pptx import Presentation
++
++
++def main():
++    prs = Presentation()
++    title_slide_layout = prs.slide_layouts[0]
++    slide = prs.slides.add_slide(title_slide_layout)
++    title = slide.shapes.title
++    subtitle = slide.placeholders[1]
++
++    title.tetx = "Hello World fromm pptx"
++    subtitle.text = "using python-ppts!!!"
++    prs.save("test.pptx")
++
++
++if __name__ == "__main__":
++    main()
+ """
+ for chunk in app.stream(
+     {
+```

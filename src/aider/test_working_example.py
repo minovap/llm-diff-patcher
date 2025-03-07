@@ -1,8 +1,13 @@
-from udiff_coder import directly_apply_hunk
+from udiff_coder import directly_apply_hunk, normalize_line_endings
 from pathlib import Path
+
+def normalize_test_data(data):
+    """Normalize line endings in test data"""
+    return normalize_line_endings(data)
 
 if __name__ == "__main__":
     # The content with a newline at the end (which is important)
+    # Normalize line endings in test data
     content = "Hello world\nThis is a test file\n"
     
     # The hunk that should match the content
@@ -12,7 +17,11 @@ if __name__ == "__main__":
         "-This is a test file\n",  # Note the newline at the end
         "+This is a modified test file\n"  # Note the newline at the end
     ]
-
+    
+    # Normalize line endings in test data
+    content = normalize_test_data(content)
+    hunk = [normalize_test_data(line) for line in hunk]
+    
     # Try directly_apply_hunk with properly formatted lines
     result = directly_apply_hunk(content, hunk)
     
@@ -28,6 +37,7 @@ if __name__ == "__main__":
         
         test_filename = "temp_test_file.txt"
         # Create a temporary file with the content
+        # Write normalized content to file
         Path(test_filename).write_text(content)
         
         result = do_replace(test_filename, content, hunk)

@@ -1,0 +1,50 @@
+```diff
+--- test_files/169-original.txt	2025-03-07 19:06:28
++++ test_files/169-modified.txt	2025-03-07 19:06:28
+@@ -6,6 +6,7 @@
+ from llama_index.core.agent import FunctionCallingAgentWorker
+ from llama_index.core.llms import ChatMessage
+ from llama_index.llms.openai import OpenAI
++import json 
+ 
+ load_dotenv()
+ 
+\ No newline at end of file
+@@ -45,7 +46,7 @@
+ ]
+ 
+ agent = FunctionCallingAgentWorker(
+-    tools=composio_tools,
++    tools=list(composio_tools), # type: ignore
+     llm=llm,
+     prefix_messages=prefix_messages,
+     max_function_calls=10,
+\ No newline at end of file
+@@ -63,7 +64,7 @@
+ 
+     # Ignore messages from the bot itself to prevent self-responses
+     if user_id == BOT_USER_ID:
+-        return "Bot ignored"
++        return "Bot ignored" # type: ignore
+ 
+     message = payload.get("text", "")
+ 
+\ No newline at end of file
+@@ -72,7 +73,7 @@
+         print(f"Bot not tagged, ignoring message - {message} - {BOT_USER_ID}")
+         return (
+             f"Bot not tagged, ignoring message - {json.dumps(payload)} - {BOT_USER_ID}"
+-        )
++        ) # type: ignore
+ 
+     # Extract channel and timestamp information from the event payload
+     channel_id = payload.get("channel", "")
+\ No newline at end of file
+@@ -91,4 +92,4 @@
+     )
+ 
+ 
+-listener.listen()
++listener.wait_forever()
+\ No newline at end of file
+```

@@ -2,6 +2,7 @@ import { applyHunk } from './apply_hunk';
 import { hunkToBeforeAfter } from './aider_udiff';
 import * as fs from 'fs';
 import * as path from 'path';
+import { normalizeLineEndings } from './normalize_utils';
 
 /**
  * Applies a diff hunk to a file or creates a new file if necessary.
@@ -17,6 +18,10 @@ export function doReplace(
   content: string | null,
   hunk: string[]
 ): string | undefined {
+  // Normalize line endings
+  if (content) content = normalizeLineEndings(content);
+  hunk = hunk.map(normalizeLineEndings);
+  
   const [beforeText, afterText] = hunkToBeforeAfter(hunk) as [string, string];
 
   // Does it want to make a new file?
