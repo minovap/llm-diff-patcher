@@ -266,7 +266,7 @@ export function processFencedBlock(
  * @param content The content to search for diffs
  * @returns Array of edits, where each edit is a tuple of [path, hunk]
  */
-export function findDiffs(content: string): Array<[string | null, string[]]> {
+export function findDiffs(content: string): Array<{ oldFileName: string, newFileName: string, hunks: string[][] }> {
   // Normalize line endings
   content = normalizeLineEndings(content);
   
@@ -275,9 +275,22 @@ export function findDiffs(content: string): Array<[string | null, string[]]> {
     content = content + "\n";
   }
 
+  // Find old/new file name pairs from the content
+  const contentLines = content.split(/\r?\n/);
+  const fileHeaders: Record<string, string> = {};
+  
+  for (let i = 0; i < contentLines.length - 1; i++) {
+    if (contentLines[i].startsWith('--- ') && contentLines[i+1].startsWith('+++ ')) {
+      const oldFileName = contentLines[i].substring(4).trim();
+      const newFileName = contentLines[i+1].substring(4).trim();
+      fileHeaders[newFileName] = oldFileName;
+    }
+  }
+
+  // Original implementation logic to extract hunks
   const lines = content.split(/\r?\n/).map(line => line + "\n");
   let lineNum = 0;
-  const edits: Array<[string | null, string[]]> = [];
+  const rawEdits: Array<[string | null, string[]]> = [];
 
   while (lineNum < lines.length) {
     while (lineNum < lines.length) {
@@ -285,12 +298,32 @@ export function findDiffs(content: string): Array<[string | null, string[]]> {
       if (line.startsWith("```diff")) {
         const result = processFencedBlock(lines, lineNum + 1);
         lineNum = result[0];
-        edits.push(...result[1]);
+        rawEdits.push(...result[1]);
         break;
       }
       lineNum += 1;
     }
   }
 
-  return edits;
+  // Group hunks by filename
+  const fileMap = new Map<string, { oldFileName: string; hunks: string[][] }>();
+  
+  for (const [filePath, hunk] of rawEdits) {
+    if (!filePath) continue;
+    
+    if (!fileMap.has(filePath)) {
+      fileMap.set(filePath, { 
+        oldFileName: fileHeaders[filePath] || 'unknown', 
+        hunks: [] 
+      });
+    }
+    fileMap.get(filePath)!.hunks.push([...hunk]);
+  }
+  
+  return Array.from(fileMap.entries()).map(([newFileName, data]) => ({
+    oldFileName: data.oldFileName,
+    newFileName,
+    hunks: data.hunks
+  }));
 }
+
