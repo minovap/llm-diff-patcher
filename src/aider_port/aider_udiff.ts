@@ -270,6 +270,16 @@ export function findDiffs(content: string): Array<{ oldFileName: string, newFile
   // Normalize line endings
   content = normalizeLineEndings(content);
   
+  // Function to clean file path by removing 'a/' and 'b/' prefixes
+  const cleanFilePath = (path: string): string => {
+    if (path.startsWith('a/')) {
+      return path.substring(2);
+    } else if (path.startsWith('b/')) {
+      return path.substring(2);
+    }
+    return path;
+  };
+  
   // Ensure content ends with newline
   if (!content.endsWith("\n")) {
     content = content + "\n";
@@ -307,7 +317,7 @@ export function findDiffs(content: string): Array<{ oldFileName: string, newFile
 
   // Group hunks by filename
   const fileMap = new Map<string, { oldFileName: string; hunks: string[][] }>();
-  
+
   for (const [filePath, hunk] of rawEdits) {
     if (!filePath) continue;
     
@@ -321,9 +331,8 @@ export function findDiffs(content: string): Array<{ oldFileName: string, newFile
   }
   
   return Array.from(fileMap.entries()).map(([newFileName, data]) => ({
-    oldFileName: data.oldFileName,
-    newFileName,
+    oldFileName: cleanFilePath(data.oldFileName),
+    newFileName: cleanFilePath(newFileName),
     hunks: data.hunks
   }));
 }
-

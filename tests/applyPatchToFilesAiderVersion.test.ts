@@ -58,10 +58,10 @@ describe('applyDiff', () => {
 
     expect(result.length).toBe(2);
     
-    expect(result[0].oldFileName).toBe('a/test1.originaltext.txt');
-    expect(result[0].newFileName).toBe('b/test2.originaltext.txt');
-    expect(result[1].oldFileName).toBe('a/test3.originaltext.txt');
-    expect(result[1].newFileName).toBe('b/test4.originaltext.txt');
+    expect(result[0].oldFileName).toBe('test1.originaltext.txt');
+    expect(result[0].newFileName).toBe('test2.originaltext.txt');
+    expect(result[1].oldFileName).toBe('test3.originaltext.txt');
+    expect(result[1].newFileName).toBe('test4.originaltext.txt');
     
     expect(result[0].hunks.length).toBe(2);
     expect(result[1].hunks.length).toBe(2);
