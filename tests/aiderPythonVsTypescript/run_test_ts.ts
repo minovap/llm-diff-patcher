@@ -1,4 +1,4 @@
-import { applyHunk } from '@src/aider_port/apply_hunk';
+import { applyHunks } from '@src/aider_port/apply_hunk';
 import { findDiffs } from '@src/aider_port/aider_udiff';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -35,12 +35,20 @@ function runTest(testNumber: string, categoryPath?: string) {
   // Find diffs from the markdown-style diff content
   const edits = findDiffs(diffContent);
   console.log(`Found ${edits.length} edits in diff file`);
+  console.log('Edits structure:', JSON.stringify(edits, null, 2));
   
-  // Get the first hunk from the edits
-  const [_filename, hunk] = edits[0];
-  
+  // Extract the first hunk from the edits based on new format
+  let hunks;
+  if (edits.length > 0 && edits[0].hunks && edits[0].hunks.length > 0) {
+    // Use the first hunk from the first file
+    hunks = edits[0].hunks[0];
+    console.log(`Using hunk from file ${edits[0].newFileName}`);
+  } else {
+    console.error('No valid hunks found in edits');
+    process.exit(1);
+  }
   // Apply the hunk to the original content
-  const modifiedContent = applyHunk(originalContent, hunk);
+  const modifiedContent = applyHunks(originalContent, hunks);
   
   if (!modifiedContent) {
     console.error(`Failed to apply diff for test ${testNum}`);

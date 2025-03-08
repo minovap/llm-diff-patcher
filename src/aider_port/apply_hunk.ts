@@ -85,7 +85,7 @@ function applyPartialHunk(
  * @param hunk Array of strings representing the diff hunk
  * @returns The modified content or undefined if the hunk couldn't be applied
  */
-export function applyHunk(content: string, hunk: string[]): string | undefined {
+export function applyHunks(content: string, hunk: string[]): string | undefined {
   // Normalize line endings
   content = normalizeLineEndings(content);
   hunk = hunk.map(normalizeLineEndings);

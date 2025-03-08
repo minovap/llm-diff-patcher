@@ -1,9 +1,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as Diff from 'diff';
-import { parsePatch, DiffsGroupedByFilenames, ParsePatchOptions } from './utils/parsePatch';
-import { applyDiff } from './utils/applyDiff';
-import { BaseError, HunkHeaderCountMismatchError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError, InsufficientContextLinesError } from './utils/errors';
+import { parsePatch, DiffsGroupedByFilenames, ParsePatchOptions } from '@src/vanilla_diff_patch/parsePatch';
+import { applyDiff } from '@src/vanilla_diff_patch/applyDiff';
+import { BaseError, HunkHeaderCountMismatchError, NoEditsInHunkError, NotEnoughContextError, PatchFormatError, InsufficientContextLinesError } from '@src/vanilla_diff_patch/errors';
 
 /**
  * Error class for file operation errors
@@ -270,7 +270,7 @@ function applyDiffToFile(
 }
 
 // Export other utilities that might be useful
-export { parsePatch, applyDiff, cleanPatch } from './utils';
+export { parsePatch, applyDiff, cleanPatch } from './vanilla_diff_patch';
 export { 
   BaseError, 
   PatchFormatError, 
@@ -278,4 +278,4 @@ export {
   NotEnoughContextError, 
   NoEditsInHunkError,
   InsufficientContextLinesError 
-} from './utils/errors';
+} from '@src/vanilla_diff_patch/errors';

@@ -1,7 +1,7 @@
-import { parsePatch } from "../src/utils/parsePatch";
+import { parsePatch } from "../src/vanilla_diff_patch/parsePatch";
 import * as Diff from "diff";
-import { NotEnoughContextError} from "../src/utils/errors";
-import {applyDiff} from "../src/utils/applyDiff";
+import { NotEnoughContextError} from "../src/vanilla_diff_patch/errors";
+import {applyDiff} from "../src/vanilla_diff_patch/applyDiff";
 
 
 describe('applyDiff', () => {

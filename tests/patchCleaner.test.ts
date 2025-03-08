@@ -1,10 +1,10 @@
-import { cleanPatch } from '../src/utils/cleanPatch';
+import { cleanPatch } from '../src/vanilla_diff_patch/cleanPatch';
 import {
   InsufficientContextLinesError,
   NoEditsInHunkError,
   NotEnoughContextError,
   PatchFormatError
-} from "../src/utils/errors";
+} from "../src/vanilla_diff_patch/errors";
 
 describe('cleanPatch', () => {
 

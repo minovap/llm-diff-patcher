@@ -1,4 +1,4 @@
-import { applyHunk } from './apply_hunk';
+import { applyHunks } from './apply_hunk';
 import { hunkToBeforeAfter } from './aider_udiff';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -43,7 +43,7 @@ export function doReplace(
   }
 
   // Try to apply the hunk to the content
-  const newContent = applyHunk(content, hunk);
+  const newContent = applyHunks(content, hunk);
   if (newContent) {
     return newContent;
   }
